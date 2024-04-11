@@ -102,7 +102,6 @@ mv ../.git .
 echo Git commit to arch
 git add .
 git commit -m "${DATE} Kernel update"
-git push -f
 
 
 
