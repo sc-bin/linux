@@ -28,7 +28,7 @@
 #include <linux/pm_wakeirq.h>
 #include <linux/regulator/consumer.h>
 
-#include <../sunxi_usb/include/sunxi_usb_debug.h>
+#include "../sunxi_usb/include/sunxi_usb_debug.h"
 
 extern int usb_disabled(void);
 extern atomic_t hci_thread_suspend_flag;
