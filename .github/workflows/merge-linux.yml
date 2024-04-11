@@ -31,3 +31,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: linux-5.15
         directory: kernel/dst/linux-5.15/linux-5.15
+        force: true
