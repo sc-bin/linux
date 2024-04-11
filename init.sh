@@ -96,7 +96,7 @@ cd kernel/dst/${BRANCH}/${BRANCH}
 echo Merge old kernel
 mv .git ../
 rm -rf *
-cp -ravf ${ROOT_PATH}/kernel/${VERSION}/${VERSION}/* .
+cp -raf ${ROOT_PATH}/kernel/${VERSION}/${VERSION}/* .
 mv ../.git .
 
 echo Git commit to arch
