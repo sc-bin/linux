@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# Usage message for the init script
 __usage="
 Usage: init [OPTIONS]
 Build Kernel repo.
@@ -12,12 +13,14 @@ Options:
   -h, --help                         Show command help.
 "
 
+# Function to display help message
 help()
 {
     echo "$__usage"
     exit $1
 }
 
+# Function to set default parameters
 default_param() {
     URL=https://cdn.kernel.org/pub/linux/kernel/v5.x/
     PATCH=linux-5.15.patch
@@ -25,6 +28,7 @@ default_param() {
     BRANCH=linux-5.15
 }
 
+# Function to parse command line arguments
 parseargs()
 {
     if [ "x$#" == "x0" ]; then
@@ -66,45 +70,52 @@ DATE=$(date)
 PATCH_PATH="patches"
 TARBALL="tar.xz"
 
+# Set default parameters
 default_param
+# Parse command line arguments
 parseargs "$@" || help $?
 
-echo You are running this scipt on a ${HOST_ARCH} mechine....
+# Display system architecture
+echo You are running this script on a ${HOST_ARCH} machine....
 
+# Create directory for kernel version
 mkdir -p kernel/${VERSION}
 
+# Download kernel source code
 echo Downloading kernel source code
-
 wget ${URL}/${VERSION}.${TARBALL} -O kernel/${VERSION}/${VERSION}.${TARBALL}
 
-echo Unarchive Kernel 
-
+# Unarchive Kernel
+echo Unarchive Kernel
 cd kernel/${VERSION}
 tar xf ${VERSION}.${TARBALL}
 cd ${VERSION}
 
-echo copy bsp files
-
+# Copy BSP files
+echo Copying BSP files
 cp -raf ${ROOT_PATH}/bsp .
 
+# Applying Patches
 echo Applying Patches
-
 cp -raf ${ROOT_PATH}/${PATCH_PATH}/${PATCH} .
 patch --binary -p1 < ${PATCH}
+rm -rf *.patch
 cd ${ROOT_PATH}
 
-echo Clone old kernel
+# Clone old kernel
+echo Cloning old kernel
 git clone https://github.com/AvaotaSBC/linux.git -b linux-5.15 kernel/dst/${BRANCH}/${BRANCH}
 cd kernel/dst/${BRANCH}/${BRANCH}
 
-echo Merge old kernel
+# Merge old kernel
+echo Merging old kernel
 mv .git ../
 rm -rf *
 rm -rf .*
 cp -raf ${ROOT_PATH}/kernel/${VERSION}/${VERSION}/* .
 mv ../.git .
 
-echo Git commit to arch
+# Git commit to archive
+echo Git commit to archive
 git add .
 git commit -m "${DATE} Kernel update"
-
