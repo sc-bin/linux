@@ -83,6 +83,10 @@ cd kernel/${VERSION}
 tar xf ${VERSION}.${TARBALL}
 cd ${VERSION}
 
+echo copy bsp files
+
+cp -raf ${ROOT_PATH}/bsp .
+
 echo Applying Patches
 
 cp -raf ${ROOT_PATH}/${PATCH_PATH}/${PATCH} .
@@ -96,6 +100,7 @@ cd kernel/dst/${BRANCH}/${BRANCH}
 echo Merge old kernel
 mv .git ../
 rm -rf *
+rm -rf .*
 cp -raf ${ROOT_PATH}/kernel/${VERSION}/${VERSION}/* .
 mv ../.git .
 
