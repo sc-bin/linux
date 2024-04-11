@@ -107,7 +107,7 @@ cd ${ROOT_PATH}
 
 # Clone old kernel
 echo Cloning old kernel
-git clone https://github.com/AvaotaSBC/linux.git -b linux-5.15 kernel/dst/${BRANCH}/${BRANCH}
+git clone https://github.com/AvaotaSBC/linux.git -b ${BRANCH} kernel/dst/${BRANCH}/${BRANCH}
 cd kernel/dst/${BRANCH}/${BRANCH}
 
 # Merge old kernel
