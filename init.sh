@@ -97,8 +97,10 @@ cp -raf ${ROOT_PATH}/bsp .
 
 # Applying Patches
 echo Applying Patches
-cp -raf ${ROOT_PATH}/${PATCH_PATH}/${PATCH} .
-patch --binary -p1 < ${PATCH}
+cp -raf ${ROOT_PATH}/${PATCH_PATH}/${BRANCH}/*.patch .
+for patchfile in *.patch; do
+    patch --binary -p1 < "$patchfile"
+done
 rm -rf *.patch
 cd ${ROOT_PATH}
 
