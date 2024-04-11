@@ -4,7 +4,7 @@
 
 /dts-v1/;
 
-#include "sun55iw3p1.dtsi"
+#include "sun55i-t527.dtsi"
 
 /{
 	model = "Avaota A1";
