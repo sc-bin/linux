@@ -9,16 +9,17 @@ Kernel source tree for AvaotaSBC-provided kernel builds.
 
 In the Kernel repo, we use Github Action to release kernel source code, and provide latest update of kernel
 
-This GitHub Actions workflow aims to merge different versions of the Linux kernel under specific conditions—either when code is pushed to the main branch or when a pull_request is created with the target branch being main.
+This GitHub Actions workflow aims to merge different versions of the Linux kernel under specific conditions—either when code is pushed to the `main` branch or when a `pull_request` is created with the target branch being `main`.
 
 Here's a breakdown of its purpose:
 
-When the triggering conditions are met, the workflow starts executing.
-It runs on the latest version of Ubuntu.
-It uses the actions/checkout@v3 action to fetch the latest version of the code repository.
-Git username and email are set to "GitHub Actions" and "actions@github.com" respectively.
-The init.sh script is executed to merge version 5.15 of the Linux kernel. This script requires parameters specifying the URL for downloading the kernel, the patch file, version number, and branch name.
-The ad-m/github-push-action@master action is utilized to push the merged code to a branch named linux-5.15, with the specified directory being kernel/dst/linux-5.15/linux-5.15.
+1. When the triggering conditions are met, the workflow starts executing.
+2. It runs on the latest version of Ubuntu.
+3. It uses the `actions/checkout@v3` action to fetch the latest version of the code repository.
+4. Git username and email are set to "GitHub Actions" and "actions@github.com" respectively.
+5. The `init.sh` script is executed to merge version 5.15 of the Linux kernel. This script requires parameters specifying the URL for downloading the kernel, the patch file, version number, and branch name.
+6. The `ad-m/github-push-action@master` action is utilized to push the merged code to a branch named `linux-5.15`, with the specified directory being `kernel/dst/linux-5.15/linux-5.15`.
+
 In summary, this workflow automates the merging of specified versions of the Linux kernel and pushes the merged code to the corresponding branch, facilitating automated code management and updates.
 
 ## How to use init.sh
