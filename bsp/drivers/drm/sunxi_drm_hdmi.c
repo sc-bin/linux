@@ -20,7 +20,12 @@
 #include <drm/drm_atomic_helper.h>
 #include <drm/drm_simple_kms_helper.h>
 #include <drm/drm_probe_helper.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 0)
 #include <drm/drm_scdc_helper.h>
+#else
+#include <drm/display/drm_scdc_helper.h>
+#endif
 
 #include <sunxi-gpio.h>
 #include <uapi/drm/drm_fourcc.h>
@@ -112,10 +117,12 @@ static const struct drm_prop_enum_list sunxi_hdmi_prop_scan_info[] = {
 	{ UNDERSCAN,              "under_scan" },
 };
 
+#if IS_ENABLED(CONFIG_EXTCON)
 static const unsigned int sunxi_hdmi_cable[] = {
 	EXTCON_DISP_HDMI,
 	EXTCON_NONE,
 };
+#endif
 
 enum sunxi_hdmi_ioctl_cmd_e {
 	SUNXI_IOCTL_HDMI_NULL            = 0,
@@ -703,7 +710,7 @@ static int _sunxi_drv_hdmi_read_edid(struct sunxi_drm_hdmi *hdmi)
 		return ret;
 	}
 
-	//mutex_lock(&hdmi->hdmi_edid.edid_lock);
+	mutex_lock(&hdmi->hdmi_edid.edid_lock);
 
 	if (hdmi->hdmi_edid.dbg_mode) {
 		hdmi_inf("hdmi drv use debug edid\n");
@@ -724,7 +731,7 @@ edid_parse:
 	ret = 0;
 
 exit:
-	//mutex_unlock(&hdmi->hdmi_edid.edid_lock);
+	mutex_unlock(&hdmi->hdmi_edid.edid_lock);
 	return ret;
 }
 
@@ -997,7 +1004,7 @@ handle_change:
 			drm_helper_hpd_irq_event(hdmi->drm);
 
 next_loop:
-		msleep(200);
+		msleep(20);
 	}
 
 	return 0;
@@ -1218,26 +1225,9 @@ _sunxi_drv_hdmi_init_resource(struct device *dev, struct sunxi_drm_hdmi *hdmi)
 		}
 	}
 
-	/* get pin control */
-	pres->hdmi_pctl = pinctrl_get(dev);
-	if (IS_ERR(pres->hdmi_pctl))
-		hdmi_inf("hdmi drv not get pinctrl\n");
-
-	/* get gpio */
-	if (pcfg->ddc_gpio_en) {
-		pres->ddc_gpio.gpio = of_get_named_gpio_flags(dev->of_node,
-			"ddc_io_ctrl", 0x0, (enum of_gpio_flags *)(&(pres->ddc_gpio)));
-
-		ret = gpio_request(pres->ddc_gpio.gpio, NULL);
-		if (ret != 0) {
-			hdmi_err("init resource to get ddc gpio is failed\n");
-			return -1;
-		}
-	}
-
 	_sunxi_drv_hdmi_clk_enable(hdmi);
 
-	//mutex_init(&hdmi->hdmi_edid.edid_lock);
+	mutex_init(&hdmi->hdmi_edid.edid_lock);
 
 	hdmi->hdmi_state.drv_hdcp_type = SUNXI_HDCP_TYPE_NULL;
 
@@ -1267,7 +1257,7 @@ static int _sunxi_drv_hdmi_init_config_value(struct sunxi_drm_hdmi *hdmi)
 static int _sunxi_hdmi_i2c_xfer(struct i2c_adapter *adap,
 			    struct i2c_msg *msgs, int num)
 {
-	return 0;
+	return sunxi_hdmi_i2c_xfer(msgs, num);
 }
 
 static u32 _sunxi_hdmi_i2c_func(struct i2c_adapter *adap)
@@ -1904,7 +1894,7 @@ static ssize_t sunxi_hdmi_cmd_hdmi_source_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	int n = 0, loop = 0;
-	u8 data = 0;
+	u8 data = 0, status = 0;
 	struct sunxi_drm_hdmi   *hdmi = dev_get_drvdata(dev);
 	struct sunxi_hdmi_dts_s *pdts = &hdmi->hdmi_dts;
 	struct sunxi_hdmi_res_s *pres = &hdmi->hdmi_res;
@@ -1935,9 +1925,10 @@ static ssize_t sunxi_hdmi_cmd_hdmi_source_show(struct device *dev,
 	if (info->hdmi.scdc.supported) {
 		n += sprintf(buf + n, "\n----------------- sink info -----------------\n");
 		data = sunxi_hdmi_scdc_read(SCDC_TMDS_CONFIG);
+		status = sunxi_hdmi_scdc_read(SCDC_SCRAMBLER_STATUS) & SCDC_SCRAMBLING_STATUS;
 		n += sprintf(buf + n, " - clock ratio[%s], scramble enable[%d], scramble status[%d]\n",
-			(data & 0x2) ? "1/40" : "1/10", (data & 0x1),
-			drm_scdc_get_scrambling_status(&hdmi->i2c_adap));
+			(data & SCDC_TMDS_BIT_CLOCK_RATIO_BY_40) ? "1/40" : "1/10",
+			(data & SCDC_SCRAMBLING_ENABLE), status);
 		data = sunxi_hdmi_scdc_read(SCDC_STATUS_FLAGS_0);
 		n += sprintf(buf + n, " - clk_lock[%d], ch0_lock[%d], ch1_lock[%d], ch2_lock[%d]\n",
 			(data & SCDC_CLOCK_DETECT), (data & SCDC_CH0_LOCK) >> 1,
@@ -2466,7 +2457,11 @@ static int _sunxi_dev_hdmi_init(struct sunxi_drm_hdmi *hdmi)
 	}
 
 	/* creat hdmi class */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 0)
 	hdmi->hdmi_class = class_create(THIS_MODULE, "hdmi");
+#else
+	hdmi->hdmi_class = class_create("hdmi");
+#endif
 	if (IS_ERR(hdmi->hdmi_class)) {
 		hdmi_err("hdmi init dev failed when create hdmi class\n");
 		goto err_class;
@@ -2715,7 +2710,6 @@ static enum drm_mode_status _sunxi_hdmi_drm_connector_mode_valid(
 /*******************************************************************************
  * drm sunxi hdmi connect functions
  ******************************************************************************/
-static u8 drm_connector_status_change_count = 0;
 static enum drm_connector_status
 _sunxi_hdmi_drm_connector_detect(struct drm_connector *connector, bool force)
 {
@@ -2726,6 +2720,7 @@ _sunxi_hdmi_drm_connector_detect(struct drm_connector *connector, bool force)
 		hdmi_err("%s param hdmi is null!!!\n", __func__);
 		return connector_status_unknown;
 	}
+
 	ret = _sunxi_drv_hdmi_hpd_get(hdmi);
 	hdmi_inf("drm hdmi detect hpd: %s\n", ret ? "plugin" : "plugout");
 	return ret == 1 ? connector_status_connected : connector_status_disconnected;
@@ -2986,6 +2981,8 @@ int sunxi_hdmi_drm_create(struct tcon_device *tcon)
 	drm_connector_attach_encoder(&hdmi->connector, &hdmi->encoder);
 
 	_sunxi_hdmi_drm_property_init(hdmi);
+
+	sunxi_hdmi_connect_creat(&hdmi->connector);
 
 	hdmi_inf("drm hdmi create finish\n");
 	return 0;

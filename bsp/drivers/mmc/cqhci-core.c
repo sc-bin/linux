@@ -954,7 +954,7 @@ irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
 	if ((status & (CQHCI_IS_RED | CQHCI_IS_GCE | CQHCI_IS_ICCE)) ||
 	    cmd_error || data_error) {
 
-#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 137)) && (LINUX_VERSION_CODE != KERNEL_VERSION(5, 15, 151)))
+#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 137)) && (LINUX_VERSION_CODE != KERNEL_VERSION(5, 15, 147)))
 		if (status & CQHCI_IS_RED)
 			mmc_debugfs_err_stats_inc(mmc, MMC_ERR_CMDQ_RED);
 		if (status & CQHCI_IS_GCE)

@@ -177,7 +177,6 @@ int _dw_i2cm_write(unsigned char *buf, unsigned int length)
 
 int dw_i2cm_xfer(struct i2c_msg *msgs, int num)
 {
-	
 	u8 addr = msgs[0].addr;
 	int i = 0, ret = 0;
 
