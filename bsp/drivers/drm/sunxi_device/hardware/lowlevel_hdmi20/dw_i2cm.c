@@ -63,7 +63,7 @@ int _dw_i2cm_read(unsigned char *buf, unsigned int length)
 {
 	u8 state = 0x0;
 	int timeout = DW_I2CM_TIMEOUT;
-	u8 retry_cnt = 5;
+	u8 retry_cnt = 2;
 
 	log_trace1(length);
 
@@ -87,11 +87,13 @@ int _dw_i2cm_read(unsigned char *buf, unsigned int length)
 			dw_write(I2CM_OPERATION, I2CM_OPERATION_RD_MASK);
 
 		do {
-			udelay(20);
-			state = dw_read(IH_I2CM_STAT0);
+			udelay(10);
+			state = dw_read_mask(IH_I2CM_STAT0,
+						IH_I2CM_STAT0_I2CMASTERERROR_MASK
+					| IH_I2CM_STAT0_I2CMASTERDONE_MASK);
 		} while ((state == 0) && (timeout--));
 
-		if ((state == 0) && (timeout == 0)) {
+		if ((state == 0) || (timeout == 0)) {
 			/* TODO, i2c may has issue. try to sw reset */
 			hdmi_inf("i2c read wait state timeout\n");
 			return -2;
@@ -154,8 +156,9 @@ int _dw_i2cm_write(unsigned char *buf, unsigned int length)
 			state = dw_read(IH_I2CM_STAT0);
 		} while ((state == 0) && (timeout--));
 
-		if ((state == 0) && (timeout == 0)) {
+		if ((state == 0) || (timeout == 0)) {
 			/* TODO, i2c may has issue. try to sw reset */
+			hdmi_inf("i2c read wait state timeout\n");
 			return -2;
 		}
 
