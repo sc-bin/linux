@@ -29,7 +29,7 @@ jobs:
     - name: Push changes Linux 5.15
       uses: ad-m/github-push-action@master
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.SY_PAT }}
         branch: linux-5.15
         directory: kernel/dst/linux-5.15/linux-5.15
         force: true
