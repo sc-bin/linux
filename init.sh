@@ -100,7 +100,6 @@ echo Applying Patches and overlays
 cp -raf ${ROOT_PATH}/${PATCH_PATH}/${BRANCH}/*.patch .
 cp -raf ${ROOT_PATH}/${PATCH_PATH}/${BRANCH}/overlays/* .
 cp -raf ${ROOT_PATH}/.github .
-ls -a
 for patchfile in *.patch; do
     patch --binary -p1 < "$patchfile"
 done
@@ -117,10 +116,10 @@ echo Merging old kernel
 mv .git ../
 rm -rf *
 cp -raf ${ROOT_PATH}/kernel/${VERSION}/${VERSION}/. .
-ls -a
 mv ../.git .
 
 # Git commit to archive
 echo Git commit to archive
+git add .github
 git add .
 git commit -m "${DATE} Kernel update"
