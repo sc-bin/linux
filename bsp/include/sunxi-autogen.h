@@ -1,1 +1,1 @@
-#define AW_BSP_VERSION "Github https://github.com/AvaotaSBC/linux/"
+#define AW_BSP_VERSION "https://github.com/AvaotaSBC/linux/"
