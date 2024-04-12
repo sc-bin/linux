@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# SPDX-License-Identifier: GPL-2.0
+
 # Usage message for the init script
 __usage="
 Usage: init [OPTIONS]
@@ -120,6 +122,6 @@ mv ../.git .
 
 # Git commit to archive
 echo Git commit to archive
-git add .github
+git add -f .github
 git add .
 git commit -m "${DATE} Kernel update"
