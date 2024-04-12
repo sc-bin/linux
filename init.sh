@@ -10,7 +10,6 @@ Build Kernel repo.
 Options:
   -u, --url        URL               The url of kernel
   -v, --version    VERSION           The version of kernel
-  -p, --patch      PATCHFILE         The patch file of kernel
   -b, --branch     BRANCH NAME       The branch of dst kernel
   -h, --help                         Show command help.
 "
@@ -25,7 +24,6 @@ help()
 # Function to set default parameters
 default_param() {
     URL=https://cdn.kernel.org/pub/linux/kernel/v5.x/
-    PATCH=linux-5.15.patch
     VERSION=linux-5.15.154
     BRANCH=linux-5.15
 }
@@ -49,10 +47,6 @@ parseargs()
             shift
         elif [ "x$1" == "x-v" -o "x$1" == "x--version" ]; then
             VERSION=`echo $2`
-            shift
-            shift
-        elif [ "x$1" == "x-p" -o "x$1" == "x--patch" ]; then
-            PATCH=`echo $2`
             shift
             shift
         elif [ "x$1" == "x-b" -o "x$1" == "x--branch" ]; then
