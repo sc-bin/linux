@@ -10,17 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set id
-      run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-
   linux-5_10:
-    needs: [setup]
     runs-on: ubuntu-latest
     env:
       KERNEL_URL: https://cdn.kernel.org/pub/linux/kernel/v5.x/
@@ -28,6 +18,10 @@ jobs:
       KERNEL_BRANCH: linux-5.10
     steps:
     - uses: actions/checkout@v3
+    - name: Set id
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
 
     - name: Merge ${{env.KERNEL_BRANCH}}
       continue-on-error: true
@@ -42,7 +36,6 @@ jobs:
         force: true
   
   linux-5_15:
-    needs: [setup]
     runs-on: ubuntu-latest
     env:
       KERNEL_URL: https://cdn.kernel.org/pub/linux/kernel/v5.x/
@@ -50,7 +43,11 @@ jobs:
       KERNEL_BRANCH: linux-5.15
     steps:
     - uses: actions/checkout@v3
-
+    - name: Set id
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        
     - name: Merge ${{env.KERNEL_BRANCH}}
       continue-on-error: true
       run: ./init.sh -u  ${{env.KERNEL_URL}} -v  ${{env.KERNEL_VERSION}} -b  ${{env.KERNEL_BRANCH}}
