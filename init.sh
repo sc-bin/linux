@@ -95,7 +95,6 @@ cp -raf ${ROOT_PATH}/bsp .
 echo Applying Patches and overlays
 cp -raf ${ROOT_PATH}/${PATCH_PATH}/${BRANCH}/*.patch .
 cp -raf ${ROOT_PATH}/${PATCH_PATH}/${BRANCH}/overlays/* .
-cp -raf ${ROOT_PATH}/.github .
 for patchfile in *.patch; do
     patch --binary -p1 < "$patchfile"
 done
@@ -116,6 +115,5 @@ mv ../.git .
 
 # Git commit to archive
 echo Git commit to archive
-git add -f .github
 git add .
 git commit -m "${DATE} Kernel update"
