@@ -100,7 +100,7 @@ echo Applying Patches and overlays
 cp -raf ${ROOT_PATH}/${PATCH_PATH}/${BRANCH}/*.patch .
 cp -raf ${ROOT_PATH}/${PATCH_PATH}/${BRANCH}/overlays/* .
 cp -raf ${ROOT_PATH}/.github .
-ls
+ls -a
 for patchfile in *.patch; do
     patch --binary -p1 < "$patchfile"
 done
