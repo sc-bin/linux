@@ -24,7 +24,7 @@ jobs:
     
     - name: Merge Linux 5.15
       continue-on-error: true
-      run: ./init.sh -u https://cdn.kernel.org/pub/linux/kernel/v5.x/ -p linux-5.15.patch -v linux-5.15.154 -b linux-5.15
+      run: ./init.sh -u https://cdn.kernel.org/pub/linux/kernel/v5.x/ -v linux-5.15.154 -b linux-5.15
 
     - name: Push changes Linux 5.15
       uses: ad-m/github-push-action@master
