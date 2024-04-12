@@ -95,10 +95,11 @@ cd ${VERSION}
 echo Copying BSP files
 cp -raf ${ROOT_PATH}/bsp .
 
-# Applying Patches and Copy overlays
+# Applying Patches and Copy overlays, CI
 echo Applying Patches and overlays
 cp -raf ${ROOT_PATH}/${PATCH_PATH}/${BRANCH}/*.patch .
 cp -raf ${ROOT_PATH}/${PATCH_PATH}/${BRANCH}/overlays/* .
+cp -raf ${ROOT_PATH}/.github .
 for patchfile in *.patch; do
     patch --binary -p1 < "$patchfile"
 done
