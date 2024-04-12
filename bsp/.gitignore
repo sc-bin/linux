@@ -14,4 +14,3 @@ Module.symvers
 *.ko.cmd
 *.elf
 .vscode*
-sunxi-autogen.h
