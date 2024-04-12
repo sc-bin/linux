@@ -115,9 +115,7 @@ cd kernel/dst/${BRANCH}/${BRANCH}
 echo Merging old kernel
 mv .git ../
 rm -rf *
-rm -rf .*
-cp -raf ${ROOT_PATH}/kernel/${VERSION}/${VERSION}/* .
-cp -raf ${ROOT_PATH}/kernel/${VERSION}/${VERSION}/.* .
+cp -raf ${ROOT_PATH}/kernel/${VERSION}/${VERSION}/. .
 mv ../.git .
 
 # Git commit to archive
