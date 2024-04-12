@@ -83,7 +83,7 @@ mkdir -p kernel/${VERSION}
 
 # Download kernel source code
 echo Downloading kernel source code
-wget ${URL}/${VERSION}.${TARBALL} -o kernel/${VERSION}/${VERSION}.${TARBALL}
+wget ${URL}/${VERSION}.${TARBALL} -O kernel/${VERSION}/${VERSION}.${TARBALL}
 
 # Unarchive Kernel
 echo Unarchive Kernel
