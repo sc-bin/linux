@@ -2575,7 +2575,7 @@
  */
 
 &combophy {
-	clk-freq-100M;
+	resets = <&ccu RST_BUS_PCIE_USB3>;
 	phy_use_sel = <1>; /* 0:PCIE; 1:USB3 */
 	status = "okay";
 };
