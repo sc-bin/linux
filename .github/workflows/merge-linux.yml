@@ -59,3 +59,28 @@ jobs:
         branch: ${{env.KERNEL_BRANCH}}
         directory: kernel/dst/${{env.KERNEL_BRANCH}}/${{env.KERNEL_BRANCH}}
         force: true
+
+  linux-6_1_aosp:
+    runs-on: ubuntu-latest
+    env:
+      KERNEL_URL: https://android.googlesource.com/kernel/common.git/+archive/refs/heads/
+      KERNEL_VERSION: android14-6.1-2023-10
+      KERNEL_BRANCH: linux-6.1-aosp
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set id
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        
+    - name: Merge ${{env.KERNEL_BRANCH}}
+      continue-on-error: true
+      run: ./init.sh -u  ${{env.KERNEL_URL}} -v ${{env.KERNEL_VERSION}} -b ${{env.KERNEL_BRANCH}} -t AOSP
+
+    - name: Push changes ${{env.KERNEL_BRANCH}}
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.SY_PAT }}
+        branch: ${{env.KERNEL_BRANCH}}
+        directory: kernel/dst/${{env.KERNEL_BRANCH}}/${{env.KERNEL_BRANCH}}
+        force: true
