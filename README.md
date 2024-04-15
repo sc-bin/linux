@@ -1,55 +1,150 @@
-# Linux Kernel Source Tree
+# How do I submit patches to Android Common Kernels
 
-Kernel source tree for AvaotaSBC-provided kernel builds.
+1. BEST: Make all of your changes to upstream Linux. If appropriate, backport to the stable releases.
+   These patches will be merged automatically in the corresponding common kernels. If the patch is already
+   in upstream Linux, post a backport of the patch that conforms to the patch requirements below.
+   - Do not send patches upstream that contain only symbol exports. To be considered for upstream Linux,
+additions of `EXPORT_SYMBOL_GPL()` require an in-tree modular driver that uses the symbol -- so include
+the new driver or changes to an existing driver in the same patchset as the export.
+   - When sending patches upstream, the commit message must contain a clear case for why the patch
+is needed and beneficial to the community. Enabling out-of-tree drivers or functionality is not
+not a persuasive case.
 
-## Kernel Branches
+2. LESS GOOD: Develop your patches out-of-tree (from an upstream Linux point-of-view). Unless these are
+   fixing an Android-specific bug, these are very unlikely to be accepted unless they have been
+   coordinated with kernel-team@android.com. If you want to proceed, post a patch that conforms to the
+   patch requirements below.
 
-| Kernel Source                                                | Kernel Type            |
-| ------------------------------------------------------------ | ---------------------- |
-| [Linux 5.10 LTS](https://github.com/AvaotaSBC/linux/tree/linux-5.10) | Linux LTS Kernel       |
-| [Linux 5.15 LTS](https://github.com/AvaotaSBC/linux/tree/linux-5.15) | Linux LTS Kernel       |
-| [Linux 6.1 AOSP](https://github.com/AvaotaSBC/linux/tree/linux-6.1-aosp) | Android Common Kernels |
+# Common Kernel patch requirements
 
-## AutoCI Branch Update
+- All patches must conform to the Linux kernel coding standards and pass `scripts/checkpatch.pl`
+- Patches shall not break gki_defconfig or allmodconfig builds for arm, arm64, x86, x86_64 architectures
+(see  https://source.android.com/setup/build/building-kernels)
+- If the patch is not merged from an upstream branch, the subject must be tagged with the type of patch:
+`UPSTREAM:`, `BACKPORT:`, `FROMGIT:`, `FROMLIST:`, or `ANDROID:`.
+- All patches must have a `Change-Id:` tag (see https://gerrit-review.googlesource.com/Documentation/user-changeid.html)
+- If an Android bug has been assigned, there must be a `Bug:` tag.
+- All patches must have a `Signed-off-by:` tag by the author and the submitter
 
-In the Kernel repo, we use Github Action to release kernel source code, and provide latest update of kernel
+Additional requirements are listed below based on patch type
 
-This GitHub Actions workflow aims to merge different versions of the Linux kernel under specific conditions—either when code is pushed to the `main` branch or when a `pull_request` is created with the target branch being `main`.
+## Requirements for backports from mainline Linux: `UPSTREAM:`, `BACKPORT:`
 
-Here's a breakdown of its purpose:
-
-1. When the triggering conditions are met, the workflow starts executing.
-2. It runs on the latest version of Ubuntu.
-3. It uses the `actions/checkout@v3` action to fetch the latest version of the code repository.
-4. Git username and email are set to "GitHub Actions" and "actions@github.com" respectively.
-5. The `init.sh` script is executed to merge version 5.15 of the Linux kernel. This script requires parameters specifying the URL for downloading the kernel, the patch file, version number, and branch name.
-6. The `ad-m/github-push-action@master` action is utilized to push the merged code to a branch named `linux-5.15`, with the specified directory being `kernel/dst/linux-5.15/linux-5.15`.
-
-In summary, this workflow automates the merging of specified versions of the Linux kernel and pushes the merged code to the corresponding branch, facilitating automated code management and updates.
-
-## How to use init.sh
-
-This shell script `init.sh` performs several tasks related to managing Linux kernel source code:
-
-1. It initializes various variables such as `HOST_ARCH`, `ROOT_PATH`, `DATE`, `PATCH_PATH`, and `TARBALL`.
-2. It sets default parameters using the `default_param` function and parses command-line arguments using the `parseargs` function.
-3. It displays the system architecture on which the script is running.
-4. It creates a directory for the specified kernel version and downloads the corresponding kernel source code from the provided URL.
-5. It unarchives the downloaded kernel source code and copies BSP (Board Support Package) files into the kernel directory.
-6. It applies patches to the kernel source code.
-7. It clones an old version of the kernel from a Git repository and merges it with the newly downloaded kernel.
-8. Finally, it commits the changes to the Git repository with a message containing the current date and "Kernel update".
-
-Overall, this script automates the process of downloading, patching, and merging Linux kernel source code for development or customization purposes.
-
+- If the patch is a cherry-pick from Linux mainline with no changes at all
+    - tag the patch subject with `UPSTREAM:`.
+    - add upstream commit information with a `(cherry picked from commit ...)` line
+    - Example:
+        - if the upstream commit message is
 ```
-Usage: init [OPTIONS]
-Build Kernel repo.
+        important patch from upstream
 
-Options:
-  -u, --url        URL               The url of kernel
-  -v, --version    VERSION           The version of kernel
-  -p, --patch      PATCHFILE         The patch file of kernel
-  -b, --branch     BRANCH NAME       The branch of dst kernel
-  -h, --help                         Show command help.
+        This is the detailed description of the important patch
+
+        Signed-off-by: Fred Jones <fred.jones@foo.org>
 ```
+>- then Joe Smith would upload the patch for the common kernel as
+```
+        UPSTREAM: important patch from upstream
+
+        This is the detailed description of the important patch
+
+        Signed-off-by: Fred Jones <fred.jones@foo.org>
+
+        Bug: 135791357
+        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
+        (cherry picked from commit c31e73121f4c1ec41143423ac6ce3ce6dafdcec1)
+        Signed-off-by: Joe Smith <joe.smith@foo.org>
+```
+
+- If the patch requires any changes from the upstream version, tag the patch with `BACKPORT:`
+instead of `UPSTREAM:`.
+    - use the same tags as `UPSTREAM:`
+    - add comments about the changes under the `(cherry picked from commit ...)` line
+    - Example:
+```
+        BACKPORT: important patch from upstream
+
+        This is the detailed description of the important patch
+
+        Signed-off-by: Fred Jones <fred.jones@foo.org>
+
+        Bug: 135791357
+        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
+        (cherry picked from commit c31e73121f4c1ec41143423ac6ce3ce6dafdcec1)
+        [joe: Resolved minor conflict in drivers/foo/bar.c ]
+        Signed-off-by: Joe Smith <joe.smith@foo.org>
+```
+
+## Requirements for other backports: `FROMGIT:`, `FROMLIST:`,
+
+- If the patch has been merged into an upstream maintainer tree, but has not yet
+been merged into Linux mainline
+    - tag the patch subject with `FROMGIT:`
+    - add info on where the patch came from as `(cherry picked from commit <sha1> <repo> <branch>)`. This
+must be a stable maintainer branch (not rebased, so don't use `linux-next` for example).
+    - if changes were required, use `BACKPORT: FROMGIT:`
+    - Example:
+        - if the commit message in the maintainer tree is
+```
+        important patch from upstream
+
+        This is the detailed description of the important patch
+
+        Signed-off-by: Fred Jones <fred.jones@foo.org>
+```
+>- then Joe Smith would upload the patch for the common kernel as
+```
+        FROMGIT: important patch from upstream
+
+        This is the detailed description of the important patch
+
+        Signed-off-by: Fred Jones <fred.jones@foo.org>
+
+        Bug: 135791357
+        (cherry picked from commit 878a2fd9de10b03d11d2f622250285c7e63deace
+         https://git.kernel.org/pub/scm/linux/kernel/git/foo/bar.git test-branch)
+        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
+        Signed-off-by: Joe Smith <joe.smith@foo.org>
+```
+
+
+- If the patch has been submitted to LKML, but not accepted into any maintainer tree
+    - tag the patch subject with `FROMLIST:`
+    - add a `Link:` tag with a link to the submittal on lore.kernel.org
+    - add a `Bug:` tag with the Android bug (required for patches not accepted into
+a maintainer tree)
+    - if changes were required, use `BACKPORT: FROMLIST:`
+    - Example:
+```
+        FROMLIST: important patch from upstream
+
+        This is the detailed description of the important patch
+
+        Signed-off-by: Fred Jones <fred.jones@foo.org>
+
+        Bug: 135791357
+        Link: https://lore.kernel.org/lkml/20190619171517.GA17557@someone.com/
+        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
+        Signed-off-by: Joe Smith <joe.smith@foo.org>
+```
+
+## Requirements for Android-specific patches: `ANDROID:`
+
+- If the patch is fixing a bug to Android-specific code
+    - tag the patch subject with `ANDROID:`
+    - add a `Fixes:` tag that cites the patch with the bug
+    - Example:
+```
+        ANDROID: fix android-specific bug in foobar.c
+
+        This is the detailed description of the important fix
+
+        Fixes: 1234abcd2468 ("foobar: add cool feature")
+        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
+        Signed-off-by: Joe Smith <joe.smith@foo.org>
+```
+
+- If the patch is a new feature
+    - tag the patch subject with `ANDROID:`
+    - add a `Bug:` tag with the Android bug (required for android-specific features)
+

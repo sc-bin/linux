@@ -36,6 +36,9 @@
 *.mod.c
 *.o
 *.o.*
+*.patch
+*.rmeta
+*.rsi
 *.s
 *.so
 *.so.dbg
@@ -44,6 +47,7 @@
 *.symversions
 *.tab.[ch]
 *.tar
+*.usyms
 *.xz
 *.zst
 Module.symvers
@@ -95,6 +99,7 @@ modules.order
 !.gitattributes
 !.gitignore
 !.mailmap
+!.rustfmt.toml
 
 #
 # Generated include files
@@ -108,6 +113,7 @@ modules.order
 patches-*
 
 # quilt's files
+patches
 series
 
 # ctags files
@@ -160,5 +166,5 @@ x509.genkey
 # Documentation toolchain
 sphinx_*/
 
-# Kernel DIr
-kernel/
+# Rust analyzer configuration
+/rust-project.json
