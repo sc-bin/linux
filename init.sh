@@ -116,4 +116,5 @@ mv ../.git .
 # Git commit to archive
 echo Git commit to archive
 git add .
+git add -f .github
 git commit -m "${DATE} Kernel update"
