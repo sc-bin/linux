@@ -1,0 +1,42 @@
+--- a/Kconfig
++++ b/Kconfig
+@@ -9,6 +9,8 @@ source "scripts/Kconfig.include"
+ 
+ source "init/Kconfig"
+ 
++source "bsp/Kconfig"
++
+ source "kernel/Kconfig.freezer"
+ 
+ source "fs/Kconfig.binfmt"
+
+--- a/Makefile
++++ b/Makefile
+@@ -489,6 +489,7 @@ USERINCLUDE    := \
+ 		-I$(srctree)/arch/$(SRCARCH)/include/uapi \
+ 		-I$(objtree)/arch/$(SRCARCH)/include/generated/uapi \
+ 		-I$(srctree)/include/uapi \
++		-I$(srctree)/bsp/include \
+ 		-I$(objtree)/include/generated/uapi \
+                 -include $(srctree)/include/linux/kconfig.h
+ 
+@@ -663,6 +664,7 @@ core-y		:= init/ usr/
+ drivers-y	:= drivers/ sound/
+ drivers-$(CONFIG_SAMPLES) += samples/
+ drivers-y	+= net/ virt/
++drivers-y	+= bsp/
+ libs-y		:= lib/
+ endif # KBUILD_EXTMOD
+ 
+--- a/scripts/Makefile.lib
++++ b/scripts/Makefile.lib
+@@ -210,7 +210,7 @@ cpp_flags      = -Wp,-MMD,$(depfile) $(NOSTDINC_FLAGS) $(LINUXINCLUDE)     \
+ 
+ ld_flags       = $(KBUILD_LDFLAGS) $(ldflags-y) $(LDFLAGS_$(@F))
+ 
+-DTC_INCLUDE    := $(srctree)/scripts/dtc/include-prefixes
++DTC_INCLUDE    := $(srctree)/scripts/dtc/include-prefixes $(srctree)/bsp/include
+ 
+ dtc_cpp_flags  = -Wp,-MMD,$(depfile).pre.tmp -nostdinc                    \
+ 		 $(addprefix -I,$(DTC_INCLUDE))                          \
+
