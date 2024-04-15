@@ -3,6 +3,7 @@
 Kernel source tree for AvaotaSBC-provided kernel builds.
 
 ## Kernel Branches
+- [Linux 5.10](https://github.com/AvaotaSBC/linux/tree/linux-5.10)
 - [Linux 5.15](https://github.com/AvaotaSBC/linux/tree/linux-5.15)
 
 ## AutoCI Branch Update
