@@ -3,8 +3,12 @@
 Kernel source tree for AvaotaSBC-provided kernel builds.
 
 ## Kernel Branches
-- [Linux 5.10](https://github.com/AvaotaSBC/linux/tree/linux-5.10)
-- [Linux 5.15](https://github.com/AvaotaSBC/linux/tree/linux-5.15)
+
+| Kernel Source                                                | Kernel Type            |
+| ------------------------------------------------------------ | ---------------------- |
+| [Linux 5.10 LTS](https://github.com/AvaotaSBC/linux/tree/linux-5.10) | Linux LTS Kernel       |
+| [Linux 5.15 LTS](https://github.com/AvaotaSBC/linux/tree/linux-5.15) | Linux LTS Kernel       |
+| [Linux 6.1 AOSP](https://github.com/AvaotaSBC/linux/tree/linux-6.1-aosp) | Android Common Kernels |
 
 ## AutoCI Branch Update
 
