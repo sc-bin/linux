@@ -50,7 +50,7 @@ jobs:
 
     - name: Merge ${{env.KERNEL_BRANCH}}
       continue-on-error: true
-      run: ./init.sh -u  ${{env.KERNEL_URL}} -v  ${{env.KERNEL_VERSION}} -b ${{env.KERNEL_BRANCH}} -d git
+      run: ./init.sh -u  ${{env.KERNEL_URL}} -v  ${{env.KERNEL_VERSION}} -b ${{env.KERNEL_BRANCH}} -d GIT
 
     - name: Push changes ${{env.KERNEL_BRANCH}}
       uses: ad-m/github-push-action@master
