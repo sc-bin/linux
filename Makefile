@@ -492,6 +492,7 @@ USERINCLUDE    := \
 		-I$(srctree)/arch/$(SRCARCH)/include/uapi \
 		-I$(objtree)/arch/$(SRCARCH)/include/generated/uapi \
 		-I$(srctree)/include/uapi \
+		-I$(srctree)/bsp/include \
 		-I$(objtree)/include/generated/uapi \
                 -include $(srctree)/include/linux/kconfig.h
 
@@ -666,6 +667,7 @@ core-y		:= init/ usr/
 drivers-y	:= drivers/ sound/
 drivers-$(CONFIG_SAMPLES) += samples/
 drivers-y	+= net/ virt/
+drivers-y	+= bsp/
 libs-y		:= lib/
 endif # KBUILD_EXTMOD
 
