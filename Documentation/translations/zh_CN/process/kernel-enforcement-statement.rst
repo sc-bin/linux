@@ -1,4 +1,4 @@
-.. _cn_process_statement_kernel:
+﻿.. _cn_process_statement_kernel:
 
 .. include:: ../disclaimer-zh_CN.rst
 

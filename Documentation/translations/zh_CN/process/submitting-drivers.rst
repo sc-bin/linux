@@ -1,4 +1,4 @@
-.. _cn_submittingdrivers:
+﻿.. _cn_submittingdrivers:
 
 .. include:: ../disclaimer-zh_CN.rst
 
