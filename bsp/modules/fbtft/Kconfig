@@ -13,6 +13,7 @@ menuconfig AVA_FB_TFT
 config AVA_FB_TFT_ST7789V
 	tristate "FB driver for the ST7789V LCD Controller"
 	depends on AVA_FB_TFT
+	depends on m
 	help
 	  This enables generic framebuffer support for the Sitronix ST7789V
 	  display controller. The controller is intended for small color
