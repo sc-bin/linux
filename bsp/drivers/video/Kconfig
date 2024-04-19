@@ -1,6 +1,0 @@
-# SPDX-License-Identifier: GPL-2.0-only
-#
-# fbdev configuration
-#
-
-source "bsp/drivers/video/sunxi/Kconfig"
