@@ -28,5 +28,5 @@ jobs:
       - name: Build Linux 5.15 Kernel Test
         run: |
           make CROSS_COMPILE=aarch64-linux-gnu- ARCH=arm64 sun55i_t527_bsp_defconfig
-          make CROSS_COMPILE=aarch64-linux-gnu- ARCH=arm64 -j$(nproc)
+          make CROSS_COMPILE=aarch64-linux-gnu- ARCH=arm64 deb-pkg -j$(nproc)
       
