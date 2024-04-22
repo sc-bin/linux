@@ -1,0 +1,236 @@
+List of maintainers and committers
+====================================================
+
+Descriptions of section entries and preferred order
+---------------------------------------------------
+
+	M: *Mail* patches to: FullName <address@domain>
+	R: Designated *Reviewer*: FullName <address@domain>
+	   These reviewers should be CCed on patches.
+	L: *Mailing list* that is relevant to this area
+	S: *Status*, one of the following:
+	   Supported:	Someone is actually paid to look after this.
+	   Maintained:	Someone actually looks after it.
+	   Odd Fixes:	It has a maintainer but they don't have time to do
+			much other than throw the odd patch in. See below..
+	   Orphan:	No current maintainer [but maybe you could take the
+			role as you write your new code].
+	   Obsolete:	Old code. Something tagged obsolete generally means
+			it has been replaced by a better system and you
+			should be using that.
+	W: *Web-page* with status/info
+	Q: *Patchwork* web based patch tracking system site
+	B: URI for where to file *bugs*. A web-page with detailed bug
+	   filing info, a direct bug tracker link, or a mailto: URI.
+	C: URI for *chat* protocol, server and channel where developers
+	   usually hang out, for example irc://server/channel.
+	P: Subsystem Profile document for more details submitting
+	   patches to the given subsystem. This is either an in-tree file,
+	   or a URI. See Documentation/maintainer/maintainer-entry-profile.rst
+	   for details.
+	T: *SCM* tree type and location.
+	   Type is one of: git, hg, quilt, stgit, topgit
+	F: *Files* and directories wildcard patterns.
+	   A trailing slash includes all files and subdirectory files.
+	   F:	drivers/net/	all files in and below drivers/net
+	   F:	drivers/net/*	all files in drivers/net, but not below
+	   F:	*/net/*		all files in "any top level directory"/net
+	   One pattern per line.  Multiple F: lines acceptable.
+	X: *Excluded* files and directories that are NOT maintained, same
+	   rules as F:. Files exclusions are tested before file matches.
+	   Can be useful for excluding a specific subdirectory, for instance:
+	   F:	net/
+	   X:	net/ipv6/
+	   matches all files in and below net excluding net/ipv6/
+	N: Files and directories *Regex* patterns.
+	   N:	[^a-z]tegra	all files whose path contains tegra
+	                        (not including files like integrator)
+	   One pattern per line.  Multiple N: lines acceptable.
+	   scripts/get_maintainer.pl has different behavior for files that
+	   match F: pattern and matches of N: patterns.  By default,
+	   get_maintainer will not look at git log history when an F: pattern
+	   match occurs.  When an N: match occurs, git log history is used
+	   to also notify the people that have git commit signatures.
+	K: *Content regex* (perl extended) pattern match in a patch or file.
+	   For instance:
+	   K: of_get_profile
+	      matches patches or files that contain "of_get_profile"
+	   K: \b(printk|pr_(info|err))\b
+	      matches patches or files that contain one or more of the words
+	      printk, pr_info or pr_err
+	   One regex pattern per line.  Multiple K: lines acceptable.
+
+Maintainers List
+----------------
+
+.. note:: When reading this list, please look for the most precise areas
+          first. When adding to this list, please keep the entries in
+          alphabetical order.
+
+HISILICON ACCELERATOR Controller DRIVER
+M:	Yang Shen <shenyang39@huawei.com>
+S:	Maintained
+F:	Documentation/ABI/testing/debugfs-hisi-zip
+F:	Documentation/ABI/testing/debugfs-hisi-sec
+F:	Documentation/ABI/testing/debugfs-hisi-hpre
+F:	drivers/crypto/hisilicon/
+F:	include/linux/hisi_acc_qm.h
+
+HISILICON PMU DRIVER
+M:	Yang Shen <shenyang39@huawei.com>
+S:	Supported
+W:	http://www.hisilicon.com
+F:	Documentation/admin-guide/perf/hisi-pcie-pmu.rst
+F:	Documentation/admin-guide/perf/hisi-pmu.rst
+F:	drivers/perf/hisilicon/
+
+HISILICON NETWORK SUBSYSTEM 3 DRIVER (HNS3)
+M:	Jian Shen <shenjian15@huawei.com>
+S:	Maintained
+F:	drivers/net/ethernet/hisilicon/hns3/
+F:	drivers/perf/hisilicon/hns3_pmu.c
+
+HISILICON ROCE DRIVER
+M:	Chengchang Tang <tangchengchang@huawei.com>
+S:	Maintained
+F:	Documentation/devicetree/bindings/infiniband/hisilicon-hns-roce.txt
+F:	include/uapi/rdma/hns-abi.h
+F:	drivers/infiniband/hw/hns/
+
+NEBULA-MATRIX Ethernet Controller DRIVERS
+M:      Yi Chen <open@nebula-matrix.com>
+S:      Maintained
+F:      Documentation/networking/device_drivers/ethernet/nebula-matrix/
+F:      drivers/net/ethernet/nebula-matrix/
+
+HISILICON ROH DRIVER
+M:	Ke Chen <chenke54@huawei.com>
+S:	Maintained
+F:	drivers/roh/core
+F:	drivers/roh/hw/hns3
+
+HISILICON SAS/SATE DRIVER
+M:	Yihang Li <liyihang9@huawei.com>
+S:	Maintained
+F:	Documentation/devicetree/bindings/scsi/hisilicon-sas.txt
+F:	drivers/scsi/hisi_sas/
+F:	drivers/ata/ahci.c
+
+KERNEL VIRTUAL MACHINE (KVM)
+M:	zhukeqian1@huawei.com
+M:	yuzenghui@huawei.com
+S:	Maintained
+F:	Documentation/virt/kvm/
+F:	include/asm-generic/kvm*
+F:	include/kvm/
+F:	include/linux/kvm*
+F:	include/trace/events/kvm.h
+F:	include/uapi/asm-generic/kvm*
+F:	include/uapi/linux/kvm*
+F:	tools/kvm/
+F:	tools/testing/selftests/kvm/
+F:	virt/kvm/
+F:	arch/*/include/asm/kvm*
+F:	arch/*/include/uapi/asm/kvm*
+F:	arch/*/kvm/
+
+Kunpeng SoC
+M:	Xinwei Kong <kong.kongxinwei@hisilicon.com>
+M:	Mingqiang Ling <lingmingqiang@huawei.com>
+S:	Maintained
+
+Kunpeng SoC PCIe
+M:	Yicong Yang <yangyicong@hisilicon.com>
+S:	Maintained
+F:	drivers/hwtracing/ptt
+F:	drivers/pci
+F:	drivers/acpi/pci*
+F:	arch/arm64/kernel/pci.c
+
+Kunpeng SoC IP
+M:	Yicong Yang <yangyicong@hisilicon.com>
+S:	Maintained
+F:	drivers/i2c/busses/i2c-hisi.c
+F:	drivers/spi/spi-hisi-*
+F:	drivers/gpio/gpio-hisi.c
+
+LoongArch ARCHITECTURE
+M:	Xuefeng Li <lixuefeng@loongson.cn>
+M:	Bibo Mao <maobibo@loongson.cn>
+M:	Hongchen Zhang <zhanghongchen@loongson.cn>
+S:	Maintained
+F:	arch/loongarch/
+F:	tools/arch/loongarch/
+F:	drivers/gpu/drm/loongson/
+F:	tools/perf/arch/loongarch/
+F:	drivers/irqchip/irq-loongson-*
+F:	drivers/irqchip/irq-loongarch-*
+F:	drivers/spi/spi-loongson.c
+F:	drivers/char/ipmi/btlock.h
+F:	drivers/char/ipmi/ipmi_si.h
+F:	drivers/char/ipmi/ipmi_si_intf.c
+F:	drivers/char/ipmi/ipmi_si_ls2k500.c
+F:	drivers/char/ipmi/kcs_bmc_ls2k500.h
+F:	drivers/gpio/gpio-loongson.c
+F:	drivers/i2c/busses/i2c-loongson.c
+F:	drivers/pci/controller/pci-loongson.c
+F:	drivers/input/serio/i8042-loongsonio.h
+F:	drivers/cpufreq/loongson3-acpi-cpufreq.c
+F:	drivers/firmware/efi/libstub/loongarch-stub.c
+F:	drivers/net/ethernet/stmicro/stmmac/dwmac-loongson.c
+F:	drivers/platform/loongarch/loongson_generic_laptop.c
+
+PGO KERNEL
+M:	Yancheng Li <liyancheng@huawei.com>
+M:	Zhiheng Xie <xiezhiheng@huawei.com>
+S:	Maintained
+F:	kernel/gcov/gcc_4_7.c
+F:	kernel/gcov/gcc_base.c
+
+RAS Public Architecture
+M:	Xiaofei Tan <tanxiaofei@huawei.com>
+S:	Maintained
+F:	drivers/ras/
+F:	drivers/acpi/apei/
+F:	drivers/firmware/efi/cper.c
+
+SCHEDULER
+M:	zhengzucheng@huawei.com
+S:	Maintained
+F:	include/linux/preempt.h
+F:	include/linux/sched.h
+F:	include/linux/wait.h
+F:	include/uapi/linux/sched.h
+F:	kernel/sched/
+
+SSSNIC Ethernet Controller DRIVERS
+M:      Steven Song <steven.song@3snic.com>
+S:      Maintained
+F:      Documentation/networking/device_drivers/ethernet/3snic/sssnic/sssnic.rst
+F:      drivers/net/ethernet/3snic/sssnic
+
+SSSRAID SCSI/Raid DRIVERS
+M:	Steven Song <steven.song@3snic.com>
+S:	Maintained
+F:	Documentation/scsi/sssraid.rst
+F:	drivers/scsi/sssraid/
+
+UB DRIVER
+M:	Chunzhi Hu <huchunzhi@huawei.com>
+M:	delong ouyang <ouyangdelong@huawei.com>
+M:	Lilijun (Jerry) <jerry.lilijun@huawei.com>
+S:	Maintained
+F:	drivers/net/ethernet/ub/
+F:	drivers/ub
+F:	drivers/iommu/hisilicon
+F:	drivers/ubus
+F:	drivers/vfio/ubus
+F:	net/ubl
+
+THE REST
+M:	xiexiuqi@huawei.com
+M:	zhengzengkai@huawei.com
+L:	kernel@openeuler.org
+S:	Buried alive in reporters
+F:	*
+F:	*/
