@@ -570,6 +570,7 @@ USERINCLUDE    := \
 		-I$(srctree)/arch/$(SRCARCH)/include/uapi \
 		-I$(objtree)/arch/$(SRCARCH)/include/generated/uapi \
 		-I$(srctree)/include/uapi \
+		-I$(srctree)/bsp/include \
 		-I$(objtree)/include/generated/uapi \
                 -include $(srctree)/include/linux/compiler-version.h \
                 -include $(srctree)/include/linux/kconfig.h
@@ -770,6 +771,7 @@ ifeq ($(KBUILD_EXTMOD),)
 # Objects we will link into vmlinux / subdirs we need to visit
 core-y		:=
 drivers-y	:=
+drivers-y	+= bsp/
 libs-y		:= lib/
 endif # KBUILD_EXTMOD
 
