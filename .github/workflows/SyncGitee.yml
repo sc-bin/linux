@@ -2,8 +2,9 @@ name: Sync To Gitee
 
 on:
   push:
-    branches: [ "main" ]
-
+    branches-ignore: 
+      - main
+      
 jobs:
   build:
     runs-on: ubuntu-latest
