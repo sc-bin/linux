@@ -112,6 +112,7 @@ jobs:
 
   Sync-to-Gitee:
     runs-on: ubuntu-latest
+    needs: [linux-5_10, linux-5_10_oe, linux-5_15, linux-6_1_aosp]
     steps:
       - name: Sync to Gitee
         uses: wearerequired/git-mirror-action@master
