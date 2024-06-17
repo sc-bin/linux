@@ -1,8 +1,0 @@
-#
-#  Touchscreen driver configuration
-#
-config  TOUCHSCREEN_TLSC6X_TS
-       tristate  "tlsc6x touchscreen driver"
-       default n
-       help
-         tlsc6x touchscreen driver

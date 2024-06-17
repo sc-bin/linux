@@ -1,3 +1,0 @@
-# SPDX-License-Identifier: GPL-2.0-only
-
-source "bsp/drivers/fs/linux-5.15/fs/Kconfig"
