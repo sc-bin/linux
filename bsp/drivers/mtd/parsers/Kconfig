@@ -1,6 +1,0 @@
-# SPDX-License-Identifier: GPL-2.0-only
-config AW_MTD_SUNXI_PARTS
-	tristate "SUNXI partitioning support"
-	help
-	  This provides partitions parser for devices based on SUNXI
-	  boards.
