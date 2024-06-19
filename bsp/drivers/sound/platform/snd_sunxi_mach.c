@@ -459,7 +459,7 @@ static int simple_parse_of(struct asoc_simple_priv *priv)
 	/* For single DAI link & old style of DT node */
 	ret = simple_dai_link_of(top_np, priv);
 	if (ret < 0) {
-		SND_LOG_ERR("simple_dai_link_of failed\n");
+		SND_LOG_DEBUG("simple_dai_link_of failed\n");
 		return ret;
 	}
 
