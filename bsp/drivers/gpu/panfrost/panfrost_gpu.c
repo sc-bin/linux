@@ -128,6 +128,18 @@ static void panfrost_gpu_init_quirks(struct panfrost_device *pfdev)
 	gpu_write(pfdev, GPU_TILER_CONFIG, quirks);
 
 
+	quirks = gpu_read(pfdev, GPU_L2_MMU_CONFIG);
+
+	/* Limit read & write ID width for AXI */
+	if (panfrost_has_hw_feature(pfdev, HW_FEATURE_3BIT_EXT_RW_L2_MMU_CONFIG))
+		quirks &= ~(L2_MMU_CONFIG_3BIT_LIMIT_EXTERNAL_READS |
+			    L2_MMU_CONFIG_3BIT_LIMIT_EXTERNAL_WRITES);
+	else
+		quirks &= ~(L2_MMU_CONFIG_LIMIT_EXTERNAL_READS |
+			    L2_MMU_CONFIG_LIMIT_EXTERNAL_WRITES);
+
+	gpu_write(pfdev, GPU_L2_MMU_CONFIG, quirks);
+
 	quirks = 0;
 	if ((panfrost_model_eq(pfdev, 0x860) || panfrost_model_eq(pfdev, 0x880)) &&
 	    pfdev->features.revision >= 0x2000)
@@ -382,7 +394,7 @@ int panfrost_gpu_init(struct panfrost_device *pfdev)
 
 	dma_set_max_seg_size(pfdev->dev, UINT_MAX);
 
-	irq = platform_get_irq_byname(to_platform_device(pfdev->dev), "gpu");
+	irq = platform_get_irq_byname(to_platform_device(pfdev->dev), "GPU");
 	if (irq <= 0)
 		return -ENODEV;
 
