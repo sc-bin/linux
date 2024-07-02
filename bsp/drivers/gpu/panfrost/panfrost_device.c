@@ -12,7 +12,6 @@
 #include "panfrost_device.h"
 #include "panfrost_devfreq.h"
 #include "panfrost_features.h"
-#include "panfrost_issues.h"
 #include "panfrost_gpu.h"
 #include "panfrost_job.h"
 #include "panfrost_mmu.h"
@@ -473,13 +472,9 @@ const char *panfrost_exception_name(u32 exception_code)
 bool panfrost_exception_needs_reset(const struct panfrost_device *pfdev,
 				    u32 exception_code)
 {
-	/* If an occlusion query write causes a bus fault on affected GPUs,
-	 * future fragment jobs may hang. Reset to workaround.
+	/* Right now, none of the GPU we support need a reset, but this
+	 * might change.
 	 */
-	if (exception_code == DRM_PANFROST_EXCEPTION_JOB_BUS_FAULT)
-		return panfrost_has_hw_issue(pfdev, HW_ISSUE_TTRX_3076);
-
-	/* No other GPUs we support need a reset */
 	return false;
 }
 
