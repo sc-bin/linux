@@ -8,8 +8,6 @@
  *
  */
 
-#define SUNXI_MODNAME "pcie-edma"
-#include <sunxi-log.h>
 #include <linux/delay.h>
 #include <linux/fs.h>
 #include <linux/gpio.h>
@@ -33,172 +31,107 @@
 #include <linux/uaccess.h>
 #include "pcie-sunxi-dma.h"
 
+static u32 SUNXI_DMA_DEFAULT_CNT = 0x04;  /* Default value for DMA wr/rd channel */
+
+static u32 SUNXI_DMA_WR_CHN_CNT;
+static u32 SUNXI_DMA_RD_CHN_CNT;
+
+static dma_channel_t *dma_wr_chn;
+static dma_channel_t *dma_rd_chn;
 
 static struct dma_trx_obj *obj_global;
 
-sunxi_pci_edma_chan_t *sunxi_pcie_dma_chan_request(enum dma_dir dma_trx, void *cb, void *data)
+dma_hdl_t sunxi_pcie_dma_chan_request(enum dma_dir dma_trx)
 {
-	struct sunxi_pcie *pci = dev_get_drvdata(obj_global->dev);
-	sunxi_pci_edma_chan_t *edma_chan = NULL;
-	u32 free_chan;
+	int i = 0;
+	dma_channel_t *pchan = NULL;
 
 	if (dma_trx == PCIE_DMA_WRITE) {
-		free_chan = find_first_zero_bit(pci->wr_edma_map, pci->num_edma);
+		for (i = 0; i < SUNXI_DMA_WR_CHN_CNT; i++) {
+			pchan = &dma_wr_chn[i];
 
-		if (free_chan >= pci->num_edma) {
-			sunxi_err(pci->dev, "No free pcie edma write channel.\n");
-			return NULL;
+			if (!pchan->dma_used) {
+				pchan->dma_used = 1;
+				pchan->chnl_num = i;
+				spin_lock_init(&pchan->lock);
+				return (dma_hdl_t)pchan;
+			}
 		}
-
-		set_bit(free_chan, pci->wr_edma_map);
-
-		edma_chan = &pci->dma_wr_chn[free_chan];
-
-		edma_chan->dma_trx = PCIE_DMA_WRITE;
-		edma_chan->chnl_num = free_chan;
-		edma_chan->callback = cb;
-		edma_chan->callback_param = data;
-
-		return edma_chan;
 	} else if (dma_trx == PCIE_DMA_READ) {
-		free_chan = find_first_zero_bit(pci->rd_edma_map, pci->num_edma);
+		for (i = 0; i < SUNXI_DMA_RD_CHN_CNT; i++) {
+			pchan = &dma_rd_chn[i];
 
-		if (free_chan >= pci->num_edma) {
-			sunxi_err(pci->dev, "No free pcie edma read channel.\n");
-			return NULL;
+			if (pchan->dma_used == 0) {
+				pchan->dma_used = 1;
+				pchan->chnl_num = i;
+				spin_lock_init(&pchan->lock);
+				return (dma_hdl_t)pchan;
+			}
 		}
-
-		set_bit(free_chan, pci->rd_edma_map);
-
-		edma_chan = &pci->dma_rd_chn[free_chan];
-
-		edma_chan->dma_trx = PCIE_DMA_READ;
-		edma_chan->chnl_num = free_chan;
-		edma_chan->callback = cb;
-		edma_chan->callback_param = data;
-
-		return edma_chan;
 	} else {
-		sunxi_err(pci->dev, "ERR: unsupported type:%d \n", dma_trx);
+		pr_err("ERR: unsupported type:%d \n", dma_trx);
 	}
 
-	return NULL;
+	return (dma_hdl_t)NULL;
 }
 EXPORT_SYMBOL_GPL(sunxi_pcie_dma_chan_request);
 
-int sunxi_pcie_dma_chan_release(struct sunxi_pci_edma_chan *edma_chan, enum dma_dir dma_trx)
+int sunxi_pcie_dma_chan_release(u32 channel, enum dma_dir dma_trx)
 {
-	struct sunxi_pcie *pci = dev_get_drvdata(obj_global->dev);
-
-	if (edma_chan->chnl_num >= pci->num_edma) {
-		sunxi_err(pci->dev, "ERR: the channel num:%d is error\n", edma_chan->chnl_num);
+	if ((channel > SUNXI_DMA_WR_CHN_CNT) || (channel > SUNXI_DMA_RD_CHN_CNT)) {
+		pr_err("ERR: the channel num:%d is error\n", channel);
 		return -1;
 	}
 
 	if (PCIE_DMA_WRITE == dma_trx) {
-		edma_chan->callback = NULL;
-		edma_chan->callback_param = NULL;
-		clear_bit(edma_chan->chnl_num, pci->wr_edma_map);
+		dma_wr_chn[channel].dma_used = 0;
+		dma_wr_chn[channel].chnl_num = 0;
 	} else if (PCIE_DMA_READ == dma_trx) {
-		edma_chan->callback = NULL;
-		edma_chan->callback_param = NULL;
-		clear_bit(edma_chan->chnl_num, pci->rd_edma_map);
-	} else {
-		sunxi_err(pci->dev, "ERR: unsupported type:%d \n", dma_trx);
+		dma_rd_chn[channel].dma_used = 0;
+		dma_rd_chn[channel].chnl_num = 0;
 	}
 
 	return 0;
 }
 EXPORT_SYMBOL_GPL(sunxi_pcie_dma_chan_release);
 
-static int sunxi_pcie_init_edma_map(struct sunxi_pcie *pci)
-{
-	pci->rd_edma_map = devm_bitmap_zalloc(pci->dev, pci->num_edma, GFP_KERNEL);
-	if (!pci->rd_edma_map)
-		return -ENOMEM;
-
-	pci->wr_edma_map = devm_bitmap_zalloc(pci->dev, pci->num_edma, GFP_KERNEL);
-	if (!pci->wr_edma_map)
-		return -ENOMEM;
-
-	return 0;
-}
-
 int sunxi_pcie_dma_get_chan(struct platform_device *pdev)
 {
-	struct sunxi_pcie *pci = platform_get_drvdata(pdev);
-	sunxi_pci_edma_chan_t *edma_chan = NULL;
-	int ret, i;
+	int ret, num;
 
-	ret = of_property_read_u32(pdev->dev.of_node, "num-edma", &pci->num_edma);
+	ret = of_property_read_u32(pdev->dev.of_node, "num-edma", &num);
 	if (ret) {
-		sunxi_err(&pdev->dev, "Failed to parse the number of edma\n");
+		dev_info(&pdev->dev, "PCIe get num-edma failed, use default num=%d\n",
+						SUNXI_DMA_DEFAULT_CNT);
+		num = SUNXI_DMA_DEFAULT_CNT;
+	}
+	SUNXI_DMA_WR_CHN_CNT = SUNXI_DMA_RD_CHN_CNT = num;  /* set the eDMA wr/rd channel num */
+
+	dma_wr_chn = devm_kcalloc(&pdev->dev, SUNXI_DMA_WR_CHN_CNT, sizeof(*dma_wr_chn), GFP_KERNEL);
+	dma_rd_chn = devm_kcalloc(&pdev->dev, SUNXI_DMA_RD_CHN_CNT, sizeof(*dma_rd_chn), GFP_KERNEL);
+	if (!dma_wr_chn || !dma_rd_chn) {
+		dev_err(&pdev->dev, "PCIe edma kzalloc failed\n");
 		return -EINVAL;
-	} else {
-		ret = sunxi_pcie_init_edma_map(pci);
-		if (ret)
-			return -EINVAL;
-	}
-
-	pci->dma_wr_chn = devm_kcalloc(&pdev->dev, pci->num_edma, sizeof(sunxi_pci_edma_chan_t), GFP_KERNEL);
-	pci->dma_rd_chn = devm_kcalloc(&pdev->dev, pci->num_edma, sizeof(sunxi_pci_edma_chan_t), GFP_KERNEL);
-	if (!pci->dma_wr_chn || !pci->dma_rd_chn) {
-		sunxi_err(&pdev->dev, "PCIe edma kzalloc failed\n");
-		return -EINVAL;
-	}
-
-	for (i = 0; i < pci->num_edma; i++) {
-		edma_chan = &pci->dma_wr_chn[i];
-		spin_lock_init(&edma_chan->lock);
-	}
-
-	for (i = 0; i < pci->num_edma; i++) {
-		edma_chan = &pci->dma_rd_chn[i];
-		spin_lock_init(&edma_chan->lock);
 	}
 
 	return 0;
 }
 EXPORT_SYMBOL_GPL(sunxi_pcie_dma_get_chan);
 
-int sunxi_pcie_edma_config_start(struct sunxi_pci_edma_chan *edma_chan)
-{
-	struct dma_table edma_table = {0};
-	int ret;
-
-	if (likely(obj_global->config_dma_trx_func)) {
-		ret = obj_global->config_dma_trx_func(&edma_table, edma_chan->src_addr, edma_chan->dst_addr,
-				edma_chan->size, edma_chan->dma_trx, edma_chan);
-
-		if (ret < 0) {
-			sunxi_err(obj_global->dev, "pcie dma mem read error ! \n");
-			return -EINVAL;
-		}
-	} else {
-		sunxi_err(obj_global->dev, "config_dma_trx_func is NULL ! \n");
-		return -EINVAL;
-	}
-
-	obj_global->start_dma_trx_func(&edma_table, obj_global);
-
-	return 0;
-}
-EXPORT_SYMBOL_GPL(sunxi_pcie_edma_config_start);
-
-int sunxi_pcie_dma_mem_read(phys_addr_t src_addr, phys_addr_t dst_addr, unsigned int size)
+int sunxi_pcie_dma_mem_read(phys_addr_t sar_addr, phys_addr_t dar_addr, unsigned int size)
 {
 	struct dma_table read_table = {0};
 	int ret;
 
 	if (likely(obj_global->config_dma_trx_func)) {
-		ret = obj_global->config_dma_trx_func(&read_table, src_addr, dst_addr, size, PCIE_DMA_READ, NULL);
+		ret = obj_global->config_dma_trx_func(&read_table, sar_addr, dar_addr, size, PCIE_DMA_READ);
 
 		if (ret < 0) {
-			sunxi_err(obj_global->dev, "pcie dma mem read error ! \n");
+			pr_err("pcie dma mem read error ! \n");
 			return -EINVAL;
 		}
 	} else {
-		sunxi_err(obj_global->dev, "config_dma_trx_func is NULL ! \n");
+		pr_err("config_dma_trx_func is NULL ! \n");
 		return -EINVAL;
 	}
 
@@ -208,20 +141,20 @@ int sunxi_pcie_dma_mem_read(phys_addr_t src_addr, phys_addr_t dst_addr, unsigned
 }
 EXPORT_SYMBOL_GPL(sunxi_pcie_dma_mem_read);
 
-int sunxi_pcie_dma_mem_write(phys_addr_t src_addr, phys_addr_t dst_addr, unsigned int size)
+int sunxi_pcie_dma_mem_write(phys_addr_t sar_addr, phys_addr_t dar_addr, unsigned int size)
 {
 	struct dma_table write_table = {0};
 	int ret;
 
 	if (likely(obj_global->config_dma_trx_func)) {
-		ret = obj_global->config_dma_trx_func(&write_table, src_addr, dst_addr, size, PCIE_DMA_WRITE, NULL);
+		ret = obj_global->config_dma_trx_func(&write_table, sar_addr, dar_addr, size, PCIE_DMA_WRITE);
 
 		if (ret < 0) {
-			sunxi_err(obj_global->dev, "pcie dma mem write error ! \n");
+			pr_err("pcie dma mem write error ! \n");
 			return -EINVAL;
 		}
 	} else {
-		sunxi_err(obj_global->dev, "config_dma_trx_func is NULL ! \n");
+		pr_err("config_dma_trx_func is NULL ! \n");
 		return -EINVAL;
 	}
 
@@ -253,11 +186,8 @@ EXPORT_SYMBOL_GPL(sunxi_pcie_dma_obj_probe);
 
 int sunxi_pcie_dma_obj_remove(struct device *dev)
 {
-	struct platform_device *pdev = to_platform_device(dev);
-	struct sunxi_pcie *pci = platform_get_drvdata(pdev);
-
-	memset(pci->dma_wr_chn, 0, sizeof(sunxi_pci_edma_chan_t) * pci->num_edma);
-	memset(pci->dma_rd_chn, 0, sizeof(sunxi_pci_edma_chan_t) * pci->num_edma);
+	memset(dma_wr_chn, 0, sizeof(dma_channel_t) * SUNXI_DMA_WR_CHN_CNT);
+	memset(dma_rd_chn, 0, sizeof(dma_channel_t) * SUNXI_DMA_RD_CHN_CNT);
 
 	obj_global->dma_list.next = NULL;
 	obj_global->dma_list.prev = NULL;

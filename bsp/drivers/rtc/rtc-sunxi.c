@@ -35,7 +35,8 @@
 #include <linux/reboot.h>
 #include <linux/version.h>
 #include "rtc-sunxi.h"
-#if (LINUX_VERSION_CODE > KERNEL_VERSION(5, 15, 0))
+#if (IS_ENABLED(CONFIG_AW_KERNEL_AOSP) && (LINUX_VERSION_CODE > KERNEL_VERSION(5, 10, 149))) || \
+	(IS_ENABLED(CONFIG_AW_KERNEL_ORIGIN) && (LINUX_VERSION_CODE > KERNEL_VERSION(5, 15, 0)))
 #include <linux/panic_notifier.h>
 #endif
 
@@ -1535,4 +1536,4 @@ module_exit(sunxi_rtc_exit);
 MODULE_DESCRIPTION("sunxi RTC driver");
 MODULE_AUTHOR("Martin <wuyan@allwinnertech.com>");
 MODULE_LICENSE("GPL v2");
-MODULE_VERSION("1.2.1");
+MODULE_VERSION("1.2.0");

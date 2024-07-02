@@ -12,8 +12,6 @@
  * published by the Free Software Foundation.
  */
 
-#define SUNXI_MODNAME "pcie"
-#include <sunxi-log.h>
 #include <linux/clk.h>
 #include <linux/delay.h>
 #include <linux/gpio.h>
@@ -38,7 +36,7 @@
 #include "pcie-sunxi-dma.h"
 #include "pcie-sunxi.h"
 
-#define SUNXI_PCIE_MODULE_VERSION	"1.0.11"
+#define SUNXI_PCIE_MODULE_VERSION	"1.0.8"
 
 void sunxi_pcie_writel(u32 val, struct sunxi_pcie *pcie, u32 offset)
 {
@@ -114,7 +112,7 @@ static void sunxi_pcie_plat_set_mode(struct sunxi_pcie *pci)
 		sunxi_pcie_writel(val, pci, PCIE_LTSSM_CTRL);
 		break;
 	default:
-		sunxi_err(pci->dev, "unsupported device type:%d\n", pci->drvdata->mode);
+		dev_err(pci->dev, "unsupported device type:%d\n", pci->drvdata->mode);
 		break;
 	}
 }
@@ -198,7 +196,7 @@ void sunxi_pcie_write_dbi(struct sunxi_pcie *pci, u32 reg, size_t size, u32 val)
 
 	ret = sunxi_pcie_cfg_write(pci->dbi_base + reg, size, val);
 	if (ret)
-		sunxi_err(pci->dev, "Write DBI address failed\n");
+		dev_err(pci->dev, "Write DBI address failed\n");
 }
 EXPORT_SYMBOL_GPL(sunxi_pcie_write_dbi);
 
@@ -209,7 +207,7 @@ u32 sunxi_pcie_read_dbi(struct sunxi_pcie *pci, u32 reg, size_t size)
 
 	ret = sunxi_pcie_cfg_read(pci->dbi_base + reg, size, &val);
 	if (ret)
-		sunxi_err(pci->dev, "Read DBI address failed\n");
+		dev_err(pci->dev, "Read DBI address failed\n");
 
 	return val;
 }
@@ -270,7 +268,7 @@ void sunxi_pcie_plat_set_rate(struct sunxi_pcie *pci)
 		val |= PORT_LINK_MODE_4_LANES;
 		break;
 	default:
-		sunxi_err(pci->dev, "num-lanes %u: invalid value\n", pci->lanes);
+		dev_err(pci->dev, "num-lanes %u: invalid value\n", pci->lanes);
 		return;
 	}
 	sunxi_pcie_writel_dbi(pci, PCIE_PORT_LINK_CONTROL, val);
@@ -311,12 +309,6 @@ static const struct sunxi_pcie_of_data sunxi_pcie_rc_v210_of_data = {
 	.cpu_pcie_addr_quirk = true,
 };
 
-static const struct sunxi_pcie_of_data sunxi_pcie_rc_v210_v2_of_data = {
-	.mode = SUNXI_PCIE_RC_TYPE,
-	.has_pcie_slv_clk = true,
-	.need_pcie_rst = true,
-};
-
 static const struct sunxi_pcie_of_data sunxi_pcie_rc_v300_of_data = {
 	.mode = SUNXI_PCIE_RC_TYPE,
 };
@@ -331,10 +323,6 @@ static const struct of_device_id sunxi_pcie_plat_of_match[] = {
 	{
 		.compatible = "allwinner,sunxi-pcie-v210-rc",
 		.data = &sunxi_pcie_rc_v210_of_data,
-	},
-	{
-		.compatible = "allwinner,sunxi-pcie-v210-v2-rc",
-		.data = &sunxi_pcie_rc_v210_v2_of_data,
 	},
 	{
 		.compatible = "allwinner,sunxi-pcie-v300-rc",
@@ -409,22 +397,22 @@ static int sunxi_pcie_plat_enable_power(struct sunxi_pcie *pci)
 
 	ret = regulator_set_voltage(pci->pcie3v3, 3300000, 3300000);
 	if (ret)
-		sunxi_warn(dev, "failed to set regulator voltage\n");
+		dev_warn(dev, "failed to set regulator voltage\n");
 
 	ret = regulator_enable(pci->pcie3v3);
 	if (ret)
-		sunxi_err(dev, "failed to enable pcie3v3 regulator\n");
+		dev_err(dev, "failed to enable pcie3v3 regulator\n");
 
 	if (IS_ERR_OR_NULL(pci->pcie1v8))
 		return 1;
 
 	ret = regulator_set_voltage(pci->pcie1v8, 1800000, 1800000);
 	if (ret)
-		sunxi_warn(dev, "failed to set regulator voltage\n");
+		dev_warn(dev, "failed to set regulator voltage\n");
 
 	ret = regulator_enable(pci->pcie1v8);
 	if (ret)
-		sunxi_err(dev, "failed to enable pcie1v8 regulator\n");
+		dev_err(dev, "failed to enable pcie1v8 regulator\n");
 
 	return ret;
 }
@@ -438,14 +426,14 @@ static int sunxi_pcie_plat_disable_power(struct sunxi_pcie *pci)
 
 	ret = regulator_disable(pci->pcie3v3);
 	if (ret)
-		sunxi_err(pci->dev, "fail to disable pcie3v3 regulator\n");
+		dev_err(pci->dev, "fail to disable pcie3v3 regulator\n");
 
 	if (IS_ERR_OR_NULL(pci->pcie1v8))
 		return ret;
 
 	ret = regulator_disable(pci->pcie1v8);
 	if (ret)
-		sunxi_err(pci->dev, "fail to disable pcie1v8 regulator\n");
+		dev_err(pci->dev, "fail to disable pcie1v8 regulator\n");
 
 	return ret;
 }
@@ -454,88 +442,64 @@ static int sunxi_pcie_plat_clk_setup(struct sunxi_pcie *pci)
 {
 	int ret;
 
-
-
-	ret = clk_prepare_enable(pci->pcie_aux);
+	ret = clk_prepare_enable(pci->pcie_ref);
 	if (ret) {
-		sunxi_err(pci->dev, "cannot prepare/enable aux clock\n");
+		dev_err(pci->dev, "cannot prepare/enable ref clock\n");
 		return ret;
 	}
 
-
-	if (pci->drvdata->has_pcie_slv_clk) {
-		ret = clk_prepare_enable(pci->pcie_slv);
-		if (ret) {
-			sunxi_err(pci->dev, "cannot prepare/enable slv clock\n");
-			goto err0;
-		}
+	ret = clk_set_rate(pci->pcie_ref, 100000000);
+	if (ret) {
+		dev_err(pci->dev, "failed to set clock freq 100M!\n");
+		goto err0;
 	}
 
-	if (pci->drvdata->need_pcie_rst) {
-		ret = reset_control_deassert(pci->pcie_rst);
-		if (ret) {
-			sunxi_err(pci->dev, "cannot reset pcie\n");
-			goto err1;
-		}
-
-		ret = reset_control_deassert(pci->pwrup_rst);
-		if (ret) {
-			sunxi_err(pci->dev, "cannot pwrup_reset pcie\n");
-			goto err1;
-		}
+	ret = clk_prepare_enable(pci->pcie_aux);
+	if (ret) {
+		dev_err(pci->dev, "cannot prepare/enable aux clock\n");
+		goto err0;
 	}
-
 
 	return 0;
 
-err1:
-	if (pci->drvdata->has_pcie_slv_clk)
-		clk_disable_unprepare(pci->pcie_slv);
 err0:
-	clk_disable_unprepare(pci->pcie_aux);
+	clk_disable_unprepare(pci->pcie_ref);
 
 	return ret;
 }
 
 static void sunxi_pcie_plat_clk_exit(struct sunxi_pcie *pci)
 {
-	if (pci->drvdata->need_pcie_rst) {
-		reset_control_assert(pci->pcie_rst);
-		reset_control_assert(pci->pwrup_rst);
-	}
-	if (pci->drvdata->has_pcie_slv_clk)
-		clk_disable_unprepare(pci->pcie_slv);
 	clk_disable_unprepare(pci->pcie_aux);
+	clk_disable_unprepare(pci->pcie_ref);
 }
 
 static int sunxi_pcie_plat_clk_get(struct platform_device *pdev, struct sunxi_pcie *pci)
 {
+	int ret;
+
+	pci->pcie_ref = devm_clk_get(&pdev->dev, "pclk_ref");
+	if (IS_ERR(pci->pcie_ref)) {
+		dev_err(&pdev->dev, "failed to clk pclk_ref\n");
+		return PTR_ERR(pci->pcie_ref);
+	}
+
+	pci->pcie_per = devm_clk_get(&pdev->dev, "pclk_per");
+	if (IS_ERR(pci->pcie_per)) {
+		dev_err(&pdev->dev, "failed to get pclk_per\n");
+		return PTR_ERR(pci->pcie_per);
+	}
+
+	ret = clk_set_parent(pci->pcie_ref, pci->pcie_per);
+	if (ret) {
+		dev_err(&pdev->dev, "failed to set parent\n");
+		return -EINVAL;
+	}
+
 	pci->pcie_aux = devm_clk_get(&pdev->dev, "pclk_aux");
 	if (IS_ERR(pci->pcie_aux)) {
-		sunxi_err(&pdev->dev, "fail to get pclk_aux\n");
+		dev_err(&pdev->dev, "fail to get pclk_aux\n");
 		return PTR_ERR(pci->pcie_aux);
-	}
-
-	if (pci->drvdata->has_pcie_slv_clk) {
-		pci->pcie_slv = devm_clk_get(&pdev->dev, "pclk_slv");
-		if (IS_ERR(pci->pcie_slv)) {
-			sunxi_err(&pdev->dev, "fail to get pclk_slv\n");
-			return PTR_ERR(pci->pcie_slv);
-		}
-	}
-
-	if (pci->drvdata->need_pcie_rst) {
-		pci->pcie_rst = devm_reset_control_get(&pdev->dev, "pclk_rst");
-		if (IS_ERR(pci->pcie_rst)) {
-			sunxi_err(&pdev->dev, "fail to get pclk_rst\n");
-			return PTR_ERR(pci->pcie_rst);
-		}
-
-		pci->pwrup_rst = devm_reset_control_get(&pdev->dev, "pwrup_rst");
-		if (IS_ERR(pci->pwrup_rst)) {
-			sunxi_err(&pdev->dev, "fail to get pwrup_rst\n");
-			return PTR_ERR(pci->pwrup_rst);
-		}
 	}
 
 	return 0;
@@ -547,7 +511,7 @@ static int sunxi_pcie_plat_combo_phy_init(struct sunxi_pcie *pci)
 
 	ret = phy_init(pci->phy);
 	if (ret) {
-		sunxi_err(pci->dev, "fail to init phy, err %d\n", ret);
+		dev_err(pci->dev, "fail to init phy, err %d\n", ret);
 		return ret;
 	}
 
@@ -568,30 +532,14 @@ static irqreturn_t sunxi_pcie_plat_sii_handler(int irq, void *arg)
 	return IRQ_HANDLED;
 }
 
-static void sunxi_pcie_plat_dma_handle_interrupt(struct sunxi_pcie *pci, u32 ch, enum dma_dir dma_trx)
+static void sunxi_pcie_plat_dma_handle_interrupt(u32 ch, enum dma_dir dma_trx)
 {
-	sunxi_pci_edma_chan_t *edma_chan = NULL;
-	sunxi_pcie_edma_callback cb = NULL;
-	void *cb_data = NULL;
+	int ret;
 
-	if (dma_trx == PCIE_DMA_WRITE) {
-		edma_chan = &pci->dma_wr_chn[ch];
-		cb = edma_chan->callback;
-		cb_data = edma_chan->callback_param;
-		if (cb)
-			cb(cb_data);
-	} else if (dma_trx == PCIE_DMA_READ) {
-		edma_chan = &pci->dma_rd_chn[ch];
-		cb = edma_chan->callback;
-		cb_data = edma_chan->callback_param;
-		if (cb)
-			cb(cb_data);
-	} else {
-		sunxi_err(pci->dev, "ERR: unsupported type:%d \n", dma_trx);
+	ret = sunxi_pcie_dma_chan_release(ch, dma_trx);
+	if (unlikely(ret < 0)) {
+		pr_err("%s is error release chnl%d !\n", __func__, ch);
 	}
-
-	if (edma_chan->cookie)
-		sunxi_pcie_dma_chan_release(edma_chan, dma_trx);
 }
 
 #define SUNXI_PCIE_DMA_IRQ_HANDLER(name, chn, dir)				\
@@ -609,14 +557,14 @@ static irqreturn_t sunxi_pcie_##name##_irq_handler				\
 		clr.doneclr = BIT(chn);								  \
 		sunxi_pcie_writel_dbi(pci, PCIE_DMA_OFFSET +					  \
 				(dir ? PCIE_DMA_RD_INT_CLEAR : PCIE_DMA_WR_INT_CLEAR), clr.dword);\
-		sunxi_pcie_plat_dma_handle_interrupt(pci, chn, dir);				  \
+		sunxi_pcie_plat_dma_handle_interrupt(chn, dir);					  \
 	}											  \
 												  \
 	if (sta.abort & BIT(chn)) {								  \
 		clr.abortclr = BIT(chn);							  \
 		sunxi_pcie_writel_dbi(pci, PCIE_DMA_OFFSET +					  \
 				(dir ? PCIE_DMA_RD_INT_CLEAR : PCIE_DMA_WR_INT_CLEAR), clr.dword);\
-		sunxi_err(pci->dev, "DMA %s channel %d is abort\n",				  \
+		dev_err(pci->dev, "DMA %s channel %d is abort\n",				  \
 							dir ? "read":"write", chn);		  \
 	}											  \
 												  \
@@ -701,38 +649,32 @@ static void sunxi_pcie_plat_dma_start(struct dma_table *table, struct dma_trx_ob
 	}
 }
 
-static int sunxi_pcie_plat_dma_config(struct dma_table *table, phys_addr_t src_addr, phys_addr_t dst_addr,
-					unsigned int size, enum dma_dir dma_trx, sunxi_pci_edma_chan_t *edma_chn)
+static int sunxi_pcie_plat_dma_config(struct dma_table *table, phys_addr_t sar_addr, phys_addr_t dar_addr,
+					unsigned int size, enum dma_dir dma_trx)
 {
-	sunxi_pci_edma_chan_t *chn = NULL;
+	dma_channel_t *chn = NULL;
 
 	table->ctx_reg.ctrllo.lie   = 0x1;
 	table->ctx_reg.ctrllo.rie   = 0x0;
 	table->ctx_reg.ctrllo.td    = 0x1;
 	table->ctx_reg.ctrlhi.dword = 0x0;
 	table->ctx_reg.xfersize = size;
-	table->ctx_reg.sarptrlo = (u32)(src_addr & 0xffffffff);
-	table->ctx_reg.sarptrhi = (u32)(src_addr >> 32);
-	table->ctx_reg.darptrlo = (u32)(dst_addr & 0xffffffff);
-	table->ctx_reg.darptrhi = (u32)(dst_addr >> 32);
+	table->ctx_reg.sarptrlo = (u32)(sar_addr & 0xffffffff);
+	table->ctx_reg.sarptrhi = (u32)(sar_addr >> 32);
+	table->ctx_reg.darptrlo = (u32)(dar_addr & 0xffffffff);
+	table->ctx_reg.darptrhi = (u32)(dar_addr >> 32);
 	table->start.stop = 0x0;
 	table->dir = dma_trx;
 
-	if (!edma_chn) {
-		chn = (sunxi_pci_edma_chan_t *)sunxi_pcie_dma_chan_request(dma_trx, NULL, NULL);
-		if (!chn) {
-			sunxi_err(NULL, "pcie request %s channel error! \n", (dma_trx ? "DMA_READ" : "DMA_WRITE"));
-			return -ENOMEM;
-		}
-
-		chn->cookie = true;
-		table->start.chnl = chn->chnl_num;
-		table->weilo.dword = (PCIE_WEIGHT << (5 * chn->chnl_num));
-	} else {
-		table->start.chnl = edma_chn->chnl_num;
-		table->weilo.dword = (PCIE_WEIGHT << (5 * edma_chn->chnl_num));
+	chn = (dma_channel_t *)sunxi_pcie_dma_chan_request(dma_trx);
+	if (!chn) {
+		pr_err("pcie request %s channel error! \n", (dma_trx ? "DMA_READ" : "DMA_WRITE"));
+		return -ENOMEM;
 	}
 
+	table->start.chnl = chn->chnl_num;
+
+	table->weilo.dword = (PCIE_WEIGHT << (5 * chn->chnl_num));
 	table->enb.enb = 0x1;
 	return 0;
 }
@@ -748,7 +690,7 @@ static int sunxi_pcie_plat_request_irq(struct sunxi_pcie *sunxi_pcie, struct pla
 	ret = devm_request_irq(&pdev->dev, irq,
 				sunxi_pcie_plat_sii_handler, IRQF_SHARED, "pcie-sii", &sunxi_pcie->pp);
 	if (ret) {
-		sunxi_err(&pdev->dev, "PCIe failed to request linkup IRQ\n");
+		dev_err(&pdev->dev, "PCIe failed to request linkup IRQ\n");
 		return ret;
 	}
 
@@ -763,7 +705,7 @@ static int sunxi_pcie_plat_request_irq(struct sunxi_pcie *sunxi_pcie, struct pla
 	ret = devm_request_irq(&pdev->dev, irq, sunxi_pcie_dma_w0_irq_handler,
 			       IRQF_SHARED, "pcie-dma-w0", sunxi_pcie);
 	if (ret) {
-		sunxi_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
+		dev_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
 		return ret;
 	}
 
@@ -774,7 +716,7 @@ static int sunxi_pcie_plat_request_irq(struct sunxi_pcie *sunxi_pcie, struct pla
 	ret = devm_request_irq(&pdev->dev, irq, sunxi_pcie_dma_w1_irq_handler,
 			       IRQF_SHARED, "pcie-dma-w1", sunxi_pcie);
 	if (ret) {
-		sunxi_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
+		dev_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
 		return ret;
 	}
 
@@ -785,7 +727,7 @@ static int sunxi_pcie_plat_request_irq(struct sunxi_pcie *sunxi_pcie, struct pla
 	ret = devm_request_irq(&pdev->dev, irq, sunxi_pcie_dma_w2_irq_handler,
 			       IRQF_SHARED, "pcie-dma-w2", sunxi_pcie);
 	if (ret) {
-		sunxi_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
+		dev_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
 		return ret;
 	}
 
@@ -796,7 +738,7 @@ static int sunxi_pcie_plat_request_irq(struct sunxi_pcie *sunxi_pcie, struct pla
 	ret = devm_request_irq(&pdev->dev, irq, sunxi_pcie_dma_w3_irq_handler,
 			       IRQF_SHARED, "pcie-dma-w3", sunxi_pcie);
 	if (ret) {
-		sunxi_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
+		dev_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
 		return ret;
 	}
 
@@ -807,7 +749,7 @@ static int sunxi_pcie_plat_request_irq(struct sunxi_pcie *sunxi_pcie, struct pla
 	ret = devm_request_irq(&pdev->dev, irq, sunxi_pcie_dma_r0_irq_handler,
 			       IRQF_SHARED, "pcie-dma-r0", sunxi_pcie);
 	if (ret) {
-		sunxi_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
+		dev_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
 		return ret;
 	}
 
@@ -818,7 +760,7 @@ static int sunxi_pcie_plat_request_irq(struct sunxi_pcie *sunxi_pcie, struct pla
 	ret = devm_request_irq(&pdev->dev, irq, sunxi_pcie_dma_r1_irq_handler,
 			       IRQF_SHARED, "pcie-dma-r1", sunxi_pcie);
 	if (ret) {
-		sunxi_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
+		dev_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
 		return ret;
 	}
 
@@ -829,7 +771,7 @@ static int sunxi_pcie_plat_request_irq(struct sunxi_pcie *sunxi_pcie, struct pla
 	ret = devm_request_irq(&pdev->dev, irq, sunxi_pcie_dma_r2_irq_handler,
 			       IRQF_SHARED, "pcie-dma-r2", sunxi_pcie);
 	if (ret) {
-		sunxi_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
+		dev_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
 		return ret;
 	}
 
@@ -840,7 +782,7 @@ static int sunxi_pcie_plat_request_irq(struct sunxi_pcie *sunxi_pcie, struct pla
 	ret = devm_request_irq(&pdev->dev, irq, sunxi_pcie_dma_r3_irq_handler,
 			       IRQF_SHARED, "pcie-dma-r3", sunxi_pcie);
 	if (ret) {
-		sunxi_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
+		dev_err(&pdev->dev, "failed to request PCIe DMA IRQ\n");
 		return ret;
 	}
 
@@ -852,7 +794,7 @@ static int sunxi_pcie_plat_dma_init(struct sunxi_pcie *pci)
 	pci->dma_obj = sunxi_pcie_dma_obj_probe(pci->dev);
 
 	if (IS_ERR(pci->dma_obj)) {
-		sunxi_err(pci->dev, "failed to prepare dma obj probe\n");
+		dev_err(pci->dev, "failed to prepare dma obj probe\n");
 		return -EINVAL;
 	}
 
@@ -878,13 +820,13 @@ static int sunxi_pcie_plat_parse_dts_res(struct platform_device *pdev, struct su
 
 	dbi_res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "dbi");
 	if (!dbi_res) {
-		sunxi_err(&pdev->dev, "get pcie dbi failed\n");
+		dev_err(&pdev->dev, "get pcie dbi failed\n");
 		return -ENODEV;
 	}
 
 	pci->dbi_base = devm_ioremap_resource(&pdev->dev, dbi_res);
 	if (IS_ERR(pci->dbi_base)) {
-		sunxi_err(&pdev->dev, "ioremap pcie dbi failed\n");
+		dev_err(&pdev->dev, "ioremap pcie dbi failed\n");
 		return PTR_ERR(pci->dbi_base);
 	}
 
@@ -893,27 +835,27 @@ static int sunxi_pcie_plat_parse_dts_res(struct platform_device *pdev, struct su
 
 	pci->link_gen = of_pci_get_max_link_speed(pdev->dev.of_node);
 	if (pci->link_gen < 0) {
-		sunxi_warn(&pdev->dev, "get pcie speed Gen failed\n");
+		dev_warn(&pdev->dev, "get pcie speed Gen failed\n");
 		pci->link_gen = 0x1;
 	}
 
 	pci->rst_gpio = devm_gpiod_get(&pdev->dev, "reset", GPIOD_OUT_HIGH);
 	if (IS_ERR(pci->rst_gpio))
-		sunxi_warn(&pdev->dev, "Failed to get \"reset-gpios\"\n");
+		dev_warn(&pdev->dev, "Failed to get \"reset-gpios\"\n");
 	else
 		gpiod_direction_output(pci->rst_gpio, 1);
 
 	pci->pcie3v3 = devm_regulator_get_optional(&pdev->dev, "pcie3v3");
 	if (IS_ERR(pci->pcie3v3))
-		sunxi_warn(&pdev->dev, "no pcie3v3 regulator found\n");
+		dev_warn(&pdev->dev, "no pcie3v3 regulator found\n");
 
 	pci->pcie1v8 = devm_regulator_get_optional(&pdev->dev, "pcie1v8");
 	if (IS_ERR(pci->pcie1v8))
-		sunxi_warn(&pdev->dev, "no pcie1v8 regulator found\n");
+		dev_warn(&pdev->dev, "no pcie1v8 regulator found\n");
 
 	ret = of_property_read_u32(np, "num-lanes", &pci->lanes);
 	if (ret) {
-		sunxi_err(&pdev->dev, "Failed to parse the number of lanes\n");
+		dev_err(&pdev->dev, "Failed to parse the number of lanes\n");
 		return -EINVAL;
 	}
 
@@ -921,7 +863,7 @@ static int sunxi_pcie_plat_parse_dts_res(struct platform_device *pdev, struct su
 
 	ret = sunxi_pcie_plat_clk_get(pdev, pci);
 	if (ret) {
-		sunxi_err(&pdev->dev, "pcie get clk init failed\n");
+		dev_err(&pdev->dev, "pcie get clk init failed\n");
 		return -ENODEV;
 	}
 
@@ -1003,7 +945,7 @@ static int sunxi_pcie_plat_probe(struct platform_device *pdev)
 	pm_runtime_enable(&pdev->dev);
 	ret = pm_runtime_get_sync(&pdev->dev);
 	if (ret < 0) {
-		sunxi_err(&pdev->dev, "pm_runtime_get_sync failed\n");
+		dev_err(&pdev->dev, "pm_runtime_get_sync failed\n");
 		goto err1;
 	}
 
@@ -1026,7 +968,7 @@ static int sunxi_pcie_plat_probe(struct platform_device *pdev)
 		ret = sunxi_pcie_ep_init(pci);
 		break;
 	default:
-		sunxi_err(&pdev->dev, "INVALID device type %d\n", pci->drvdata->mode);
+		dev_err(&pdev->dev, "INVALID device type %d\n", pci->drvdata->mode);
 		ret = -EINVAL;
 		break;
 	}
@@ -1034,7 +976,7 @@ static int sunxi_pcie_plat_probe(struct platform_device *pdev)
 	if (ret)
 		goto err3;
 
-	sunxi_info(&pdev->dev, "driver version: %s\n", SUNXI_PCIE_MODULE_VERSION);
+	dev_info(&pdev->dev, "driver version: %s\n", SUNXI_PCIE_MODULE_VERSION);
 
 	return 0;
 
@@ -1070,7 +1012,7 @@ static int sunxi_pcie_plat_remove(struct platform_device *pdev)
 		sunxi_pcie_ep_deinit(pci);
 		break;
 	default:
-		sunxi_err(&pdev->dev, "unspport device type %d\n", pci->drvdata->mode);
+		dev_err(&pdev->dev, "unspport device type %d\n", pci->drvdata->mode);
 		break;
 	}
 
@@ -1126,7 +1068,7 @@ static int sunxi_pcie_plat_resume(struct device *dev)
 		/* TODO */
 		break;
 	default:
-		sunxi_err(pci->dev, "unsupport device type %d\n", pci->drvdata->mode);
+		dev_err(pci->dev, "unsupport device type %d\n", pci->drvdata->mode);
 		break;
 	}
 
