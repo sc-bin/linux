@@ -65,7 +65,6 @@ struct inno_phy_dev_s {
 };
 
 static struct inno_phy_dev_s phy_dev;
-static DECLARE_WAIT_QUEUE_HEAD(phy_wq);
 
 static volatile struct __inno_phy_reg_t *phy_base;
 
@@ -132,7 +131,7 @@ static struct inno_phy_mpll_s *_inno_phy_get_mpll_params(void)
 {
 	struct dw_hdmi_dev_s *hdmi = dw_get_hdmi();
 	int size = 0, index = 0;
-	u32 ref_clk = 0x0, tmds_clk = hdmi->tmds_clk;
+	u32 ref_clk = 0x0, tmds_clk = hdmi->ctrl_dev.tmds_clk;
 
 	size = ARRAY_SIZE(phy_mpll) - 1;
 
@@ -184,7 +183,7 @@ static struct inno_phy_mpll_s *_inno_phy_get_mpll_params(void)
 clk_cfg:
 	for (index = 0; phy_mpll[index].tmds_clk != 0; index++) {
 		if (ref_clk == phy_mpll[index].tmds_clk) {
-			phy_log("inno phy mpll use table[%d]\n", index);
+			hdmi_inf("inno phy param use table[%d]\n", index);
 			return &(phy_mpll[index]);
 		}
 	}
@@ -209,9 +208,10 @@ static void _inno_phy_digital_reset(void)
 
 /**
  * @state: 1: turn on; 0: turn off
- */
+*/
 static void _inno_turn_dirver_ctrl(u8 state)
 {
+	hdmi_trace("inno phy turn %s driver ctrl\n", state ? "on" : "off");
 	phy_base->hdmi_phy_dr0_2.bits.ch0_dr_en = state;
 	phy_base->hdmi_phy_dr0_2.bits.ch1_dr_en = state;
 	phy_base->hdmi_phy_dr0_2.bits.ch2_dr_en = state;
@@ -220,9 +220,10 @@ static void _inno_turn_dirver_ctrl(u8 state)
 
 /**
  * @state: 1: turn on; 0: turn off
- */
+*/
 static void _inno_turn_serializer_ctrl(u8 state)
 {
+	hdmi_trace("inno phy turn %s serializer ctrl\n", state ? "on" : "off");
 	phy_base->hdmi_phy_dr3_2.bits.ch0_seri_en = state;
 	phy_base->hdmi_phy_dr3_2.bits.ch1_seri_en = state;
 	phy_base->hdmi_phy_dr3_2.bits.ch2_seri_en = state;
@@ -230,20 +231,20 @@ static void _inno_turn_serializer_ctrl(u8 state)
 
 /**
  * @state: 1: turn on; 0: turn off
- */
+*/
 static void _inno_turn_ldo_ctrl(u8 state)
 {
+	hdmi_trace("inno phy turn %s ldo ctrl\n", state ? "on" : "off");
 	phy_base->hdmi_phy_dr1_0.bits.clk_LDO_en = state;
 	phy_base->hdmi_phy_dr1_0.bits.ch0_LDO_en = state;
 	phy_base->hdmi_phy_dr1_0.bits.ch1_LDO_en = state;
 	phy_base->hdmi_phy_dr1_0.bits.ch2_LDO_en = state;
 
 	if (phy_dev.version != INNO_PHY_VERSION_0) {
+		hdmi_trace("inno phy turn %s ldo cur\n", state ? "on" : "off");
 		phy_base->hdmi_phy_dr2_1.bits.ch0_LDO_cur = state;
 		phy_base->hdmi_phy_dr2_1.bits.ch1_LDO_cur = state;
 		phy_base->hdmi_phy_dr2_1.bits.ch2_LDO_cur = state;
-		phy_log("inno phy turn %s LDO when phy version %d\n",
-			state ? "on" : "off", phy_dev.version);
 	}
 }
 
@@ -252,6 +253,7 @@ static void _inno_turn_ldo_ctrl(u8 state)
 */
 static void _inno_turn_pll_ctrl(u8 state)
 {
+	hdmi_trace("inno phy turn %s pll ctrl\n", state ? "on" : "off");
 	phy_base->hdmi_phy_pll2_2.bits.postpll_pow = !state;
 	phy_base->hdmi_phy_pll0_0.bits.prepll_pow  = !state;
 }
@@ -261,6 +263,7 @@ static void _inno_turn_pll_ctrl(u8 state)
 */
 static void _inno_turn_resense_ctrl(u8 state)
 {
+	log_trace1(state);
 	phy_base->hdmi_phy_rxsen_esd_0.bits.ch0_rxsense_en = state;
 	phy_base->hdmi_phy_rxsen_esd_0.bits.ch1_rxsense_en = state;
 	phy_base->hdmi_phy_rxsen_esd_0.bits.ch2_rxsense_en = state;
@@ -272,6 +275,7 @@ static void _inno_turn_resense_ctrl(u8 state)
  */
 static void _inno_turn_biascircuit_ctrl(u8 state)
 {
+	log_trace1(state);
 	phy_base->hdmi_phy_dr0_0.bits.bias_en = state;
 }
 
@@ -280,6 +284,7 @@ static void _inno_turn_biascircuit_ctrl(u8 state)
  */
 static void _inno_turn_resistor_ctrl(u8 state)
 {
+	log_trace1(state);
 	phy_base->hdmi_phy_dr0_0.bits.refres = state;
 
 	if (phy_dev.version != INNO_PHY_VERSION_0) {
@@ -316,7 +321,6 @@ void _inno_phy_config_4k60(void)
 		phy_base->hdmi_phy_dr6_1.bits.ch2terres_ndiv = 0x28;
 		phy_base->hdmi_phy_dr6_2.bits.ch1terres_ndiv = 0x28;
 		phy_base->hdmi_phy_dr6_3.bits.ch0terres_ndiv = 0x28;
-		phy_log("inno phy config clkterres ndiv when phy version 0\n");
 	}
 
 	/* config resistance 100 */
@@ -335,6 +339,10 @@ void _inno_phy_config_4k60(void)
 
 void _inno_phy_config_4k30(void)
 {
+	if ((phy_dev.version == INNO_PHY_VERSION_0) ||
+			(phy_dev.version == INNO_PHY_VERSION_2))
+		return ;
+
 	// resence config
 	phy_base->hdmi_phy_dr5_2.bits.terrescal_clkdiv0 = 0xF0;
 	phy_base->hdmi_phy_dr5_1.bits.terrescal_clkdiv1 = 0x0;//24M/240 = 100K
@@ -359,18 +367,13 @@ static int _inno_phy_mpll_config(void)
 
 	config = _inno_phy_get_mpll_params();
 	if (!config) {
-		hdmi_err("inno phy con not get mpll table\n");
 		return -1;
 	}
 
 	if (config->tmds_clk == 594000) {
 		_inno_phy_config_4k60();
-		phy_log("inno phy individual config 4k60\n");
 	} else if (config->tmds_clk == 297000) {
-		if (phy_dev.version == INNO_PHY_VERSION_1) {
-			_inno_phy_config_4k30();
-			phy_log("inno phy individual config 4k30 when phy version 1\n");
-		}
+		_inno_phy_config_4k30();
 	}
 
 	phy_base->hdmi_phy_pll0_1.bits.prepll_div =
@@ -454,6 +457,7 @@ static inline int _inno_phy_get_pll_lock(void)
 
 static void _inno_phy_cfg_cur_bias(u32 data)
 {
+	log_trace1(data);
 	phy_base->hdmi_phy_dr4_0.bits.ch0_cur_bias = dw_to_byte(data, 0);
 	phy_base->hdmi_phy_dr4_0.bits.ch1_cur_bias = dw_to_byte(data, 1);
 	phy_base->hdmi_phy_dr3_3.bits.ch2_cur_bias = dw_to_byte(data, 2);
@@ -462,6 +466,7 @@ static void _inno_phy_cfg_cur_bias(u32 data)
 
 static void _inno_phy_cfg_vlevel(u32 data)
 {
+	log_trace1(data);
 	phy_base->hdmi_phy_dr1_1.bits.clk_vlevel = dw_to_byte(data, 0);
 	phy_base->hdmi_phy_dr1_2.bits.ch2_vlevel = dw_to_byte(data, 1);
 	phy_base->hdmi_phy_dr1_3.bits.ch1_vlevel = dw_to_byte(data, 2);
@@ -470,6 +475,7 @@ static void _inno_phy_cfg_vlevel(u32 data)
 
 static void _inno_phy_cfg_pre_empl(u32 data)
 {
+	log_trace1(data);
 	phy_base->hdmi_phy_dr0_3.bits.clk_pre_empl = dw_to_byte(data, 0);
 	phy_base->hdmi_phy_dr2_3.bits.ch2_pre_empl = dw_to_byte(data, 1);
 	phy_base->hdmi_phy_dr3_0.bits.ch1_pre_empl = dw_to_byte(data, 2);
@@ -478,6 +484,7 @@ static void _inno_phy_cfg_pre_empl(u32 data)
 
 static void _inno_phy_cfg_post_empl(u32 data)
 {
+	log_trace1(data);
 	phy_base->hdmi_phy_dr0_3.bits.clk_post_empl = dw_to_byte(data, 0);
 	phy_base->hdmi_phy_dr2_3.bits.ch2_post_empl = dw_to_byte(data, 1);
 	phy_base->hdmi_phy_dr3_0.bits.ch1_post_empl = dw_to_byte(data, 2);
@@ -486,16 +493,17 @@ static void _inno_phy_cfg_post_empl(u32 data)
 
 static void _inno_phy_enable_data_sync(void)
 {
+	log_trace();
 	phy_base->hdmi_phy_ctl0_2.bits.data_sy_ctl = 0x0;
 	mdelay(1);
 	phy_base->hdmi_phy_ctl0_2.bits.data_sy_ctl = 0x1;
 }
 
-static int _inno_phy_config_drive(void)
+static int _inno_phy_config_electrical(void)
 {
 	struct inno_phy_electric_s *elec_table = NULL;
 	struct dw_hdmi_dev_s *hdmi = dw_get_hdmi();
-	u32 tmds_clk = hdmi->tmds_clk;
+	u32 tmds_clk = hdmi->ctrl_dev.tmds_clk;
 	int i = 0;
 	int table_line = 0;
 
@@ -518,9 +526,8 @@ static int _inno_phy_config_drive(void)
 				continue;
 		}
 
-		hdmi_inf("inno phy tmds clock: %dKHz match in [%dKHz~%dKHz]\n",
-			tmds_clk, elec_table[i].min_clk, elec_table[i].max_clk);
-		hdmi_inf(" - drive use: 0x%08x, 0x%08x, 0x%08x, 0x%08x\n",
+		hdmi_inf("%dHz match in [%dHz,%dHz]: 0x%x, 0x%x, 0x%x, 0x%x\n",
+			tmds_clk, elec_table[i].min_clk, elec_table[i].max_clk,
 			elec_table[i].cur_bias, elec_table[i].vlevel,
 			elec_table[i].pre_empl, elec_table[i].post_empl);
 
@@ -541,7 +548,7 @@ static int _inno_phy_config_drive(void)
 
 static int _inno_phy_config_flow(void)
 {
-	int ret = 0;
+	int i = 0, status = 0, ret = 0;
 
 	/* inno phy turn off */
 	_inno_phy_turn_off();
@@ -555,10 +562,11 @@ static int _inno_phy_config_flow(void)
 	_inno_turn_resense_ctrl(0x1);
 	mdelay(1);
 
-	ret = wait_event_timeout(phy_wq, _inno_phy_get_rxsense_lock(),
-				msecs_to_jiffies(10));
-	if (ret == 0)
-		hdmi_wrn("inno phy wait rxsense lock timeout\n");
+	/* wait rx sense detect. if not wait done, will ingore continue config */
+	do {
+		i++;
+		udelay(1);
+	} while ((i < INNO_PHY_TIMEOUT) && !_inno_phy_get_rxsense_lock());
 
 	/* start config inno phy mpll */
 	ret = _inno_phy_mpll_config();
@@ -568,10 +576,16 @@ static int _inno_phy_config_flow(void)
 	}
 
 	/* wait for pre-PLL and post-PLL lock */
-	ret = wait_event_timeout(phy_wq, _inno_phy_get_pll_lock(),
-				msecs_to_jiffies(10));
-	if (ret == 0) {
-		hdmi_err("inno phy wait pre-pll and post-pll lock timeout\n");
+	for (i = 0; i < INNO_PHY_TIMEOUT; i++) {
+		udelay(5);
+		status = _inno_phy_get_pll_lock();
+		if (status & 0x1) {
+			video_log("[%s]:phy pll lock detection result\n", __func__);
+			break;
+		}
+	}
+	if ((i >= INNO_PHY_TIMEOUT) && !status) {
+		hdmi_err("phy pll lock Timeout! status = 0x%x\n", status);
 		return -1;
 	}
 
@@ -583,9 +597,8 @@ static int _inno_phy_config_flow(void)
 	_inno_turn_dirver_ctrl(0x1);
 
 	/* config electrical capability */
-	ret = _inno_phy_config_drive();
+	ret = _inno_phy_config_electrical();
 	if (ret != 0) {
-		hdmi_err("inno phy config drive failed\n");
 		return -1;
 	}
 
@@ -593,7 +606,6 @@ static int _inno_phy_config_flow(void)
 
 	_inno_phy_enable_data_sync();
 
-	hdmi_trace("inno phy config done!\n");
 	return 0;
 }
 
@@ -608,7 +620,6 @@ static void _inno_phy_reset(void)
 	_inno_phy_analog_reset();
 
 	_inno_phy_digital_reset();
-	phy_log("inno phy reset done\n");
 }
 
 int inno_phy_write(u8 addr, void *data)
@@ -673,7 +684,7 @@ int inno_phy_init(void)
 	phy_dev.elec_data = (struct inno_phy_electric_s *)tmp_buf;
 
 	for (i = 0; i < (phy_dev.elec_size / 6); i++) {
-		hdmi_inf("line[%d], min_clk: %d, max_clk: %d, 0x%x, 0x%x, 0x%x, 0x%x\n",
+		phy_log("line[%d], min_clk: %d, max_clk: %d, 0x%x, 0x%x, 0x%x, 0x%x\n",
 			i, phy_dev.elec_data[i].min_clk, phy_dev.elec_data[i].max_clk,
 			phy_dev.elec_data[i].cur_bias, phy_dev.elec_data[i].vlevel,
 			phy_dev.elec_data[i].pre_empl, phy_dev.elec_data[i].post_empl);
@@ -700,9 +711,13 @@ int inno_phy_config(void)
 	}
 
 	ret = dw_phy_wait_lock();
-	hdmi_inf("dw phy wait pll: %s\n", ret == 1 ? "lock" : "unlock");
+	if (ret == 1) {
+		hdmi_inf("inno phy pll locked!\n");
+		return 0;
+	}
 
-	return ret;
+	hdmi_err("inno phy pll not locked\n");
+	return -1;
 }
 
 ssize_t inno_phy_dump(char *buf)

@@ -1,5 +1,4 @@
 # SPDX-License-Identifier: GPL-2.0
-ccflag-y += -DDYNAMIC_DEBUG_MODULE
 
 ccflags-y += -I $(srctree)/drivers/pci/
 
