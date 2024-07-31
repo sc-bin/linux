@@ -199,278 +199,6 @@
 		status = "okay";
 	};
 
-	edp_panel_backlight: edp_backlight {
-		compatible = "pwm-backlight";
-		status = "disabled";
-		brightness-levels = <
-			  0   1   2   3   4   5   6   7
-			  8   9  10  11  12  13  14  15
-			 16  17  18  19  20  21  22  23
-			 24  25  26  27  28  29  30  31
-			 32  33  34  35  36  37  38  39
-			 40  41  42  43  44  45  46  47
-			 48  49  50  51  52  53  54  55
-			 56  57  58  59  60  61  62  63
-			 64  65  66  67  68  69  70  71
-			 72  73  74  75  76  77  78  79
-			 80  81  82  83  84  85  86  87
-			 88  89  90  91  92  93  94  95
-			 96  97  98  99 100 101 102 103
-			104 105 106 107 108 109 110 111
-			112 113 114 115 116 117 118 119
-			120 121 122 123 124 125 126 127
-			128 129 130 131 132 133 134 135
-			136 137 138 139 140 141 142 143
-			144 145 146 147 148 149 150 151
-			152 153 154 155 156 157 158 159
-			160 161 162 163 164 165 166 167
-			168 169 170 171 172 173 174 175
-			176 177 178 179 180 181 182 183
-			184 185 186 187 188 189 190 191
-			192 193 194 195 196 197 198 199
-			200 201 202 203 204 205 206 207
-			208 209 210 211 212 213 214 215
-			216 217 218 219 220 221 222 223
-			224 225 226 227 228 229 230 231
-			232 233 234 235 236 237 238 239
-			240 241 242 243 244 245 246 247
-			248 249 250 251 252 253 254 255>;
-		default-brightness-level = <200>;
-		enable-gpios = <&pio PI 5 GPIO_ACTIVE_HIGH>;
-		/* power-supply = <&reg_backlight_12v>; */
-		pwms = <&pwm0 5 5000000 0>;
-	};
-
-	edp_panel: edp_panel {
-		compatible = "edp-general-panel";
-		status = "okay";
-		power0-supply = <&reg_dcdc4>;
-
-		backlight = <&edp_panel_backlight>;
-
-		panel-timing {
-			clock-frequency = <348577920>; /* pixel clock */
-			hactive = <2560>;
-			hback-porch = <120>;
-			hfront-porch = <88>;
-			hsync-len = <32>;
-			vactive = <1600>;
-			vback-porch = <71>;
-			vfront-porch = <28>;
-			vsync-len = <5>;
-			/* hor_sync_polarity */
-			hsync-active = <1>;
-			/* ver_sync_polarity */
-			vsync-active = <1>;
-
-			// unused now
-			/*
-			de-active = <1>;
-			pixelclk-active = <1>;
-			syncclk-active = <0>;
-			interlaced;
-			doublescan;
-			doubleclk;
-			*/
-		};
-		ports {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			panel_in: port@0 {
-				#address-cells = <1>;
-				#size-cells = <0>;
-				reg = <0>;
-				edp_panel_in: endpoint@0 {
-					reg = <0>;
-					remote-endpoint = <&edp_panel_out>;
-				};
-			};
-		};
-	};
-
-	rgb_panel0_backlight: backlight0 {
-		compatible = "pwm-backlight";
-		status = "okay";
-		brightness-levels = <
-			  0   1   2   3   4   5   6   7
-			  8   9  10  11  12  13  14  15
-			 16  17  18  19  20  21  22  23
-			 24  25  26  27  28  29  30  31
-			 32  33  34  35  36  37  38  39
-			 40  41  42  43  44  45  46  47
-			 48  49  50  51  52  53  54  55
-			 56  57  58  59  60  61  62  63
-			 64  65  66  67  68  69  70  71
-			 72  73  74  75  76  77  78  79
-			 80  81  82  83  84  85  86  87
-			 88  89  90  91  92  93  94  95
-			 96  97  98  99 100 101 102 103
-			104 105 106 107 108 109 110 111
-			112 113 114 115 116 117 118 119
-			120 121 122 123 124 125 126 127
-			128 129 130 131 132 133 134 135
-			136 137 138 139 140 141 142 143
-			144 145 146 147 148 149 150 151
-			152 153 154 155 156 157 158 159
-			160 161 162 163 164 165 166 167
-			168 169 170 171 172 173 174 175
-			176 177 178 179 180 181 182 183
-			184 185 186 187 188 189 190 191
-			192 193 194 195 196 197 198 199
-			200 201 202 203 204 205 206 207
-			208 209 210 211 212 213 214 215
-			216 217 218 219 220 221 222 223
-			224 225 226 227 228 229 230 231
-			232 233 234 235 236 237 238 239
-			240 241 242 243 244 245 246 247
-			248 249 250 251 252 253 254 255>;
-		default-brightness-level = <200>;
-		enable-gpios = <&pio PI 2 GPIO_ACTIVE_HIGH>;
-		pwms = <&pwm0 4 50000 0>;
-	};
-
-	rgb_panel0: panel@0 {
-		compatible = "BP101WX1";
-		status = "okay";
-		reg = <0>;
-		power0-supply = <&reg_cldo3>;
-		power1-supply = <&reg_dcdc4>;
-		power2-supply = <&reg_cldo1>;
-
-		backlight = <&rgb_panel0_backlight>;
-
-		lcd_if              = <0>;
-		lcd_width           = <150>;
-		lcd_height          = <94>;
-
-		pinctrl-0 = <&rgb18_pins_a>;
-		pinctrl-1 = <&rgb18_pins_b>;
-		pinctrl-names = "active","sleep";
-
-		panel-timing {
-			clock-frequency = <74871600>; /* pixel clock */
-			hback-porch = <88>;
-			hactive = <1280>;
-			hfront-porch = <83>;
-			hsync-len = <18>;
-			vback-porch = <23>;
-			vactive = <800>;
-			vfront-porch = <37>;
-			vsync-len = <10>;
-
-			// unused now
-			/*
-			hsync-active = <0>;
-			vsync-active = <0>;
-			de-active = <1>;
-			pixelclk-active = <1>;
-			*/
-		};
-		ports {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			rgb_panel0_in: port@0 {
-				#address-cells = <1>;
-				#size-cells = <0>;
-				reg = <0>;
-				rgb_panel0_in_lcd0: endpoint@0 {
-					reg = <0>;
-					remote-endpoint = <&tcon0_out_panel>;
-				};
-			};
-		};
-	};
-
-	lvds_panel1_backlight: backlight1 {
-		compatible = "pwm-backlight";
-		status = "disabled";
-		brightness-levels = <
-			  0   1   2   3   4   5   6   7
-			  8   9  10  11  12  13  14  15
-			 16  17  18  19  20  21  22  23
-			 24  25  26  27  28  29  30  31
-			 32  33  34  35  36  37  38  39
-			 40  41  42  43  44  45  46  47
-			 48  49  50  51  52  53  54  55
-			 56  57  58  59  60  61  62  63
-			 64  65  66  67  68  69  70  71
-			 72  73  74  75  76  77  78  79
-			 80  81  82  83  84  85  86  87
-			 88  89  90  91  92  93  94  95
-			 96  97  98  99 100 101 102 103
-			104 105 106 107 108 109 110 111
-			112 113 114 115 116 117 118 119
-			120 121 122 123 124 125 126 127
-			128 129 130 131 132 133 134 135
-			136 137 138 139 140 141 142 143
-			144 145 146 147 148 149 150 151
-			152 153 154 155 156 157 158 159
-			160 161 162 163 164 165 166 167
-			168 169 170 171 172 173 174 175
-			176 177 178 179 180 181 182 183
-			184 185 186 187 188 189 190 191
-			192 193 194 195 196 197 198 199
-			200 201 202 203 204 205 206 207
-			208 209 210 211 212 213 214 215
-			216 217 218 219 220 221 222 223
-			224 225 226 227 228 229 230 231
-			232 233 234 235 236 237 238 239
-			240 241 242 243 244 245 246 247
-			248 249 250 251 252 253 254 255>;
-		default-brightness-level = <200>;
-		enable-gpios = <&pio PI 5 GPIO_ACTIVE_HIGH>;
-		pwms = <&pwm0 5 5000000 0>;
-	};
-
-	lvds_panel1: panel@1 {
-		compatible = "BP101WX1";
-		status = "disabled";
-		reg = <1>;
-		power0-supply = <&reg_cldo3>;
-		power1-supply = <&reg_dcdc4>;
-
-		backlight = <&lvds_panel1_backlight>;
-
-		lcd_if              = <3>;
-		lcd_width           = <150>;
-		lcd_height          = <94>;
-
-		pinctrl-0 = <&lvds2_pins_a>;
-		pinctrl-1 = <&lvds2_pins_b>;
-		pinctrl-names = "active","sleep";
-
-		panel-timing {
-			clock-frequency = <74871600>; /* pixel clock */
-			hback-porch = <88>;
-			hactive = <1280>;
-			hfront-porch = <83>;
-			hsync-len = <18>;
-			vback-porch = <23>;
-			vactive = <800>;
-			vfront-porch = <37>;
-			vsync-len = <10>;
-			// unused now
-			/*
-			hsync-active = <0>;
-			vsync-active = <0>;
-			de-active = <1>;
-			pixelclk-active = <1>;
-			*/
-		};
-		ports {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			lvds_panel1_in: port@0 {
-				#address-cells = <1>;
-				#size-cells = <0>;
-				reg = <0>;
-				lvds_panel1_in_lcd2: endpoint@0 {
-					reg = <0>;
-					remote-endpoint = <&tcon4_out_panel>;
-				};
-			};
-		};
-	};
 };
 
 &de {
@@ -508,6 +236,7 @@
 		};
 	};
 };
+
 
 &dlcd2 {
 	status = "disabled";
@@ -2633,18 +2362,6 @@
 	sunxi,spi-cs-mode = <SUNXI_SPI_CS_SOFT>;
 	status = "okay";
 
-	spi_board0 {
-		device_type = "spi_board0";
-		compatible = "spi-nor";
-		spi-max-frequency = <100000000>;
-		m25p,fast-read = <1>;
-		/*individual_lock;*/
-		reg = <0x0>;
-		spi-rx-bus-width=<0x04>;
-		spi-tx-bus-width=<0x04>;
-		status="disabled";
-	};
-
 	spi-nand@0 {
 		compatible = "spi-nand";
 		spi-max-frequency=<100000000>;
@@ -2840,6 +2557,281 @@ chn_cfg_mode     : Hardware DE channel allocation config. 0:single display with 
 	pinctrl-names = "active", "sleep";
 	pinctrl-0 = <&pwm0_0_pin_active>;
 	pinctrl-1 = <&pwm0_0_pin_sleep>;
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+	edp_panel_backlight: edp_backlight {
+		compatible = "pwm-backlight";
+		status = "disabled";
+		brightness-levels = <
+			  0   1   2   3   4   5   6   7
+			  8   9  10  11  12  13  14  15
+			 16  17  18  19  20  21  22  23
+			 24  25  26  27  28  29  30  31
+			 32  33  34  35  36  37  38  39
+			 40  41  42  43  44  45  46  47
+			 48  49  50  51  52  53  54  55
+			 56  57  58  59  60  61  62  63
+			 64  65  66  67  68  69  70  71
+			 72  73  74  75  76  77  78  79
+			 80  81  82  83  84  85  86  87
+			 88  89  90  91  92  93  94  95
+			 96  97  98  99 100 101 102 103
+			104 105 106 107 108 109 110 111
+			112 113 114 115 116 117 118 119
+			120 121 122 123 124 125 126 127
+			128 129 130 131 132 133 134 135
+			136 137 138 139 140 141 142 143
+			144 145 146 147 148 149 150 151
+			152 153 154 155 156 157 158 159
+			160 161 162 163 164 165 166 167
+			168 169 170 171 172 173 174 175
+			176 177 178 179 180 181 182 183
+			184 185 186 187 188 189 190 191
+			192 193 194 195 196 197 198 199
+			200 201 202 203 204 205 206 207
+			208 209 210 211 212 213 214 215
+			216 217 218 219 220 221 222 223
+			224 225 226 227 228 229 230 231
+			232 233 234 235 236 237 238 239
+			240 241 242 243 244 245 246 247
+			248 249 250 251 252 253 254 255>;
+		default-brightness-level = <200>;
+		enable-gpios = <&pio PI 5 GPIO_ACTIVE_HIGH>;
+		/* power-supply = <&reg_backlight_12v>; */
+		pwms = <&pwm0 5 5000000 0>;
+	};
+
+	edp_panel: edp_panel {
+		compatible = "edp-general-panel";
+		status = "okay";
+		power0-supply = <&reg_dcdc4>;
+
+		backlight = <&edp_panel_backlight>;
+
+		panel-timing {
+			clock-frequency = <348577920>; /* pixel clock */
+			hactive = <2560>;
+			hback-porch = <120>;
+			hfront-porch = <88>;
+			hsync-len = <32>;
+			vactive = <1600>;
+			vback-porch = <71>;
+			vfront-porch = <28>;
+			vsync-len = <5>;
+			/* hor_sync_polarity */
+			hsync-active = <1>;
+			/* ver_sync_polarity */
+			vsync-active = <1>;
+
+			// unused now
+			/*
+			de-active = <1>;
+			pixelclk-active = <1>;
+			syncclk-active = <0>;
+			interlaced;
+			doublescan;
+			doubleclk;
+			*/
+		};
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			panel_in: port@0 {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				reg = <0>;
+				edp_panel_in: endpoint@0 {
+					reg = <0>;
+					remote-endpoint = <&edp_panel_out>;
+				};
+			};
+		};
+	};
+
+	rgb_panel0_backlight: backlight0 {
+		compatible = "pwm-backlight";
+		status = "okay";
+		brightness-levels = <
+			  0   1   2   3   4   5   6   7
+			  8   9  10  11  12  13  14  15
+			 16  17  18  19  20  21  22  23
+			 24  25  26  27  28  29  30  31
+			 32  33  34  35  36  37  38  39
+			 40  41  42  43  44  45  46  47
+			 48  49  50  51  52  53  54  55
+			 56  57  58  59  60  61  62  63
+			 64  65  66  67  68  69  70  71
+			 72  73  74  75  76  77  78  79
+			 80  81  82  83  84  85  86  87
+			 88  89  90  91  92  93  94  95
+			 96  97  98  99 100 101 102 103
+			104 105 106 107 108 109 110 111
+			112 113 114 115 116 117 118 119
+			120 121 122 123 124 125 126 127
+			128 129 130 131 132 133 134 135
+			136 137 138 139 140 141 142 143
+			144 145 146 147 148 149 150 151
+			152 153 154 155 156 157 158 159
+			160 161 162 163 164 165 166 167
+			168 169 170 171 172 173 174 175
+			176 177 178 179 180 181 182 183
+			184 185 186 187 188 189 190 191
+			192 193 194 195 196 197 198 199
+			200 201 202 203 204 205 206 207
+			208 209 210 211 212 213 214 215
+			216 217 218 219 220 221 222 223
+			224 225 226 227 228 229 230 231
+			232 233 234 235 236 237 238 239
+			240 241 242 243 244 245 246 247
+			248 249 250 251 252 253 254 255>;
+		default-brightness-level = <200>;
+		enable-gpios = <&pio PI 2 GPIO_ACTIVE_HIGH>;
+		pwms = <&pwm0 4 50000 0>;
+	};
+
+	rgb_panel0: panel@0 {
+		compatible = "BP101WX1";
+		status = "okay";
+		reg = <0>;
+		power0-supply = <&reg_cldo3>;
+		power1-supply = <&reg_dcdc4>;
+		power2-supply = <&reg_cldo1>;
+
+		backlight = <&rgb_panel0_backlight>;
+
+		lcd_if              = <0>;
+		lcd_width           = <150>;
+		lcd_height          = <94>;
+
+		pinctrl-0 = <&rgb18_pins_a>;
+		pinctrl-1 = <&rgb18_pins_b>;
+		pinctrl-names = "active","sleep";
+
+		panel-timing {
+			clock-frequency = <74871600>; /* pixel clock */
+			hback-porch = <88>;
+			hactive = <1280>;
+			hfront-porch = <83>;
+			hsync-len = <18>;
+			vback-porch = <23>;
+			vactive = <800>;
+			vfront-porch = <37>;
+			vsync-len = <10>;
+
+			// unused now
+			/*
+			hsync-active = <0>;
+			vsync-active = <0>;
+			de-active = <1>;
+			pixelclk-active = <1>;
+			*/
+		};
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			rgb_panel0_in: port@0 {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				reg = <0>;
+				rgb_panel0_in_lcd0: endpoint@0 {
+					reg = <0>;
+					remote-endpoint = <&tcon0_out_panel>;
+				};
+			};
+		};
+	};
+
+	lvds_panel1_backlight: backlight1 {
+		compatible = "pwm-backlight";
+		status = "disabled";
+		brightness-levels = <
+			  0   1   2   3   4   5   6   7
+			  8   9  10  11  12  13  14  15
+			 16  17  18  19  20  21  22  23
+			 24  25  26  27  28  29  30  31
+			 32  33  34  35  36  37  38  39
+			 40  41  42  43  44  45  46  47
+			 48  49  50  51  52  53  54  55
+			 56  57  58  59  60  61  62  63
+			 64  65  66  67  68  69  70  71
+			 72  73  74  75  76  77  78  79
+			 80  81  82  83  84  85  86  87
+			 88  89  90  91  92  93  94  95
+			 96  97  98  99 100 101 102 103
+			104 105 106 107 108 109 110 111
+			112 113 114 115 116 117 118 119
+			120 121 122 123 124 125 126 127
+			128 129 130 131 132 133 134 135
+			136 137 138 139 140 141 142 143
+			144 145 146 147 148 149 150 151
+			152 153 154 155 156 157 158 159
+			160 161 162 163 164 165 166 167
+			168 169 170 171 172 173 174 175
+			176 177 178 179 180 181 182 183
+			184 185 186 187 188 189 190 191
+			192 193 194 195 196 197 198 199
+			200 201 202 203 204 205 206 207
+			208 209 210 211 212 213 214 215
+			216 217 218 219 220 221 222 223
+			224 225 226 227 228 229 230 231
+			232 233 234 235 236 237 238 239
+			240 241 242 243 244 245 246 247
+			248 249 250 251 252 253 254 255>;
+		default-brightness-level = <200>;
+		enable-gpios = <&pio PI 5 GPIO_ACTIVE_HIGH>;
+		pwms = <&pwm0 5 5000000 0>;
+	};
+
+	lvds_panel1: panel@1 {
+		compatible = "BP101WX1";
+		status = "disabled";
+		reg = <1>;
+		power0-supply = <&reg_cldo3>;
+		power1-supply = <&reg_dcdc4>;
+
+		backlight = <&lvds_panel1_backlight>;
+
+		lcd_if              = <3>;
+		lcd_width           = <150>;
+		lcd_height          = <94>;
+
+		pinctrl-0 = <&lvds2_pins_a>;
+		pinctrl-1 = <&lvds2_pins_b>;
+		pinctrl-names = "active","sleep";
+
+		panel-timing {
+			clock-frequency = <74871600>; /* pixel clock */
+			hback-porch = <88>;
+			hactive = <1280>;
+			hfront-porch = <83>;
+			hsync-len = <18>;
+			vback-porch = <23>;
+			vactive = <800>;
+			vfront-porch = <37>;
+			vsync-len = <10>;
+			// unused now
+			/*
+			hsync-active = <0>;
+			vsync-active = <0>;
+			de-active = <1>;
+			pixelclk-active = <1>;
+			*/
+		};
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			lvds_panel1_in: port@0 {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				reg = <0>;
+				lvds_panel1_in_lcd2: endpoint@0 {
+					reg = <0>;
+					remote-endpoint = <&tcon4_out_panel>;
+				};
+			};
+		};
+	};
 };
 
 &lcd0 {

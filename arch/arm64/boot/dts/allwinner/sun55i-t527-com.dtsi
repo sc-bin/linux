@@ -1,0 +1,331 @@
+
+&pio {
+
+
+	uart2_pins_a: uart2_pins@0 {
+		pins = "PB0", "PB1";
+		function = "uart2";
+	};
+
+	uart2_pins_b: uart2_pins@1 {
+		pins = "PB0", "PB1";
+		function = "gpio_in";
+	};
+
+	uart3_pins_a: uart3_pins@0 {
+		pins = "PD14", "PD15";
+		function = "uart3";
+	};
+
+	uart3_pins_b: uart3_pins@1 {
+		pins = "PD14", "PD15";
+		function = "gpio_in";
+	};
+
+	uart4_pins_a: uart4_pins@0 {
+		pins = "PD18", "PD19";
+		function = "uart4";
+	};
+
+	uart4_pins_b: uart4_pins@1 {
+		pins = "PD18", "PD19";
+		function = "gpio_in";
+	};
+
+	uart5_pins_a: uart5_pins@0 {
+		pins = "PE11", "PE12";
+		function = "uart5";
+	};
+
+	uart5_pins_b: uart5_pins@1 {
+		pins = "PE11", "PE12";
+		function = "gpio_in";
+	};
+
+	uart6_pins_a: uart6_pins@0 {
+		pins = "PI6", "PI7";
+		function = "uart6";
+	};
+
+	uart6_pins_b: uart6_pins@1 {
+		pins = "PI6", "PI7";
+		function = "gpio_in";
+	};
+
+	uart7_pins_a: uart7_pins@0 {
+		pins = "PB11", "PB12";
+		function = "uart7";
+	};
+
+	uart7_pins_b: uart7_pins@1 {
+		pins = "PB11", "PB12";
+		function = "gpio_in";
+	};
+
+
+	twi0_pins_default: twi0@0 {
+		pins = "PD22", "PD23";
+		function = "twi0";
+		drive-strength = <10>;
+		bias-pull-up;
+	};
+
+	twi0_pins_sleep: twi0@1 {
+		pins = "PD22", "PD23";
+		function = "gpio_in";
+	};
+
+	twi1_pins_default: twi1@0 {
+		pins = "PH2", "PH3";
+		function = "twi1";
+		drive-strength = <10>;
+		bias-pull-up;
+	};
+
+	twi1_pins_sleep: twi1@1 {
+		pins = "PH2", "PH3";
+		function = "gpio_in";
+	};
+
+	twi2_pins_default: twi2@0 {
+		pins = "PE1", "PE2";
+		function = "twi2";
+		drive-strength = <20>;
+		bias-pull-up;
+	};
+
+	twi2_pins_sleep: twi2@1 {
+		pins = "PE1", "PE2";
+		function = "gpio_in";
+	};
+
+	twi3_pins_default: twi3@0 {
+		pins = "PE3", "PE4";
+		function = "twi3";
+		drive-strength = <20>;
+		bias-pull-up;
+	};
+
+	twi3_pins_sleep: twi3@1 {
+		pins = "PE3", "PE4";
+		function = "gpio_in";
+	};
+
+	twi4_pins_default: twi4@0 {
+		pins = "PE13", "PE14";
+		function = "twi4";
+		drive-strength = <10>;
+		bias-pull-up;
+	};
+
+	twi4_pins_sleep: twi4@1 {
+		pins = "PE13", "PE14";
+		function = "gpio_in";
+	};
+
+	twi5_pins_default: twi5@0 {
+		pins = "PI8", "PI9";
+		function = "twi5";
+		drive-strength = <10>;
+		bias-pull-up;
+	};
+
+	twi5_pins_sleep: twi5@1 {
+		pins = "PI8", "PI9";
+		function = "gpio_in";
+	};
+};
+&r_pio {
+	uart8_pins_a: uart8_pins@0 {
+		pins = "PL2", "PL3";
+		function = "s_uart0";
+	};
+
+	uart8_pins_b: uart8_pins@1 {
+		pins = "PL2", "PL3";
+		function = "gpio_in";
+	};
+
+	uart9_pins_a: uart9_pins@0 {
+		pins = "PM0", "PM1";
+		function = "s_uart1";
+	};
+
+	uart9_pins_b: uart9_pins@1 {
+		pins = "PM0", "PM1";
+		function = "gpio_in";
+	};
+
+	s_twi1_pins_default: s_twi1@0 {
+		pins = "PL8", "PL9";
+		function = "s_twi1";
+		drive-strength = <10>;
+		bias-pull-up;
+	};
+
+	s_twi1_pins_sleep: s_twi1@1 {
+		pins = "PL8", "PL9";
+		function = "gpio_in";
+	};
+
+	s_twi2_pins_default: s_twi2@0 {
+		pins = "PL12", "PL13";
+		function = "s_twi2";
+		drive-strength = <10>;
+		bias-pull-up;
+	};
+
+	s_twi2_pins_sleep: s_twi2@1 {
+		pins = "PL12", "PL13";
+		function = "gpio_in";
+	};
+
+};
+&uart1 {
+	status = "okay";
+};
+
+&uart2 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&uart2_pins_a>;
+	pinctrl-1 = <&uart2_pins_b>;
+	status = "disabled";
+};
+
+&uart3 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&uart3_pins_a>;
+	pinctrl-1 = <&uart3_pins_b>;
+	status = "disabled";
+};
+
+&uart4 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&uart4_pins_a>;
+	pinctrl-1 = <&uart4_pins_b>;
+	status = "disabled";
+};
+
+&uart5 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&uart5_pins_a>;
+	pinctrl-1 = <&uart5_pins_b>;
+	status = "disabled";
+};
+
+&uart6 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&uart6_pins_a>;
+	pinctrl-1 = <&uart6_pins_b>;
+	status = "okay";
+};
+
+&uart7 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&uart7_pins_a>;
+	pinctrl-1 = <&uart7_pins_b>;
+	status = "disabled";
+};
+
+&uart8 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&uart8_pins_a>;
+	pinctrl-1 = <&uart8_pins_b>;
+	status = "disabled";
+};
+
+&uart9 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&uart9_pins_a>;
+	pinctrl-1 = <&uart9_pins_b>;
+	status = "disabled";
+};
+
+
+&twi0 {
+	clock-frequency = <400000>;
+	pinctrl-0 = <&twi0_pins_default>;
+	pinctrl-1 = <&twi0_pins_sleep>;
+	pinctrl-names = "default", "sleep";
+	/* For stability and backwards compatibility, we recommend setting ‘twi_drv_used’ to 1 */
+	twi_drv_used = <1>;
+	twi-supply = <&reg_dcdc4>;
+	status = "disabled";
+};
+
+&twi1 {
+	clock-frequency = <400000>;
+	pinctrl-0 = <&twi1_pins_default>;
+	pinctrl-1 = <&twi1_pins_sleep>;
+	pinctrl-names = "default", "sleep";
+	/* For stability and backwards compatibility, we recommend setting ‘twi_drv_used’ to 1 */
+	twi_drv_used = <1>;
+	status = "disabled";
+};
+
+&twi2 {
+	clock-frequency = <400000>;
+	pinctrl-0 = <&twi2_pins_default>;
+	pinctrl-1 = <&twi2_pins_sleep>;
+	pinctrl-names = "default", "sleep";
+	/* For stability and backwards compatibility, we recommend setting ‘twi_drv_used’ to 1 */
+	twi_drv_used = <1>;
+	twi-supply = <&reg_dcdc4>;
+	status = "okay";
+};
+
+&twi3 {
+	clock-frequency = <400000>;
+	pinctrl-0 = <&twi3_pins_default>;
+	pinctrl-1 = <&twi3_pins_sleep>;
+	pinctrl-names = "default", "sleep";
+	/* For stability and backwards compatibility, we recommend setting ‘twi_drv_used’ to 1 */
+	twi_drv_used = <1>;
+	twi-supply = <&reg_dcdc4>;
+	status = "okay";
+};
+
+&twi4 {
+	clock-frequency = <400000>;
+	pinctrl-0 = <&twi4_pins_default>;
+	pinctrl-1 = <&twi4_pins_sleep>;
+	pinctrl-names = "default", "sleep";
+	/* For stability and backwards compatibility, we recommend setting ‘twi_drv_used’ to 1 */
+	twi_drv_used = <1>;
+	twi-supply = <&reg_dcdc4>;
+	status = "okay";
+};
+
+&twi5 {
+	clock-frequency = <400000>;
+	pinctrl-0 = <&twi5_pins_default>;
+	pinctrl-1 = <&twi5_pins_sleep>;
+	pinctrl-names = "default", "sleep";
+	/* For stability and backwards compatibility, we recommend setting ‘twi_drv_used’ to 1 */
+	twi_drv_used = <1>;
+	twi-supply = <&reg_dcdc4>;
+	status = "disabled";
+};
+
+
+&twi7 {
+	clock-frequency = <400000>;
+	pinctrl-0 = <&s_twi1_pins_default>;
+	pinctrl-1 = <&s_twi1_pins_sleep>;
+	pinctrl-names = "default", "sleep";
+	/* For stability and backwards compatibility, we recommend setting ‘twi_drv_used’ to 1 */
+	twi_drv_used = <1>;
+	twi-supply = <&reg_aldo3>;
+	status = "disabled";
+};
+
+&twi8 {
+	clock-frequency = <400000>;
+	pinctrl-0 = <&s_twi2_pins_default>;
+	pinctrl-1 = <&s_twi2_pins_sleep>;
+	pinctrl-names = "default", "sleep";
+	/* For stability and backwards compatibility, we recommend setting ‘twi_drv_used’ to 1 */
+	twi_drv_used = <1>;
+	twi-supply = <&reg_aldo3>;
+	status = "disabled";
+};

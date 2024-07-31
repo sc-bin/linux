@@ -1505,6 +1505,8 @@
 					};
 				};
 				tcon4_out: port@1 {
+					#address-cells = <1>;
+					#size-cells = <0>;
 					reg = <1>;
 	/*			tcon4_out_panel: endpoint@0 {
 					reg = <0>;

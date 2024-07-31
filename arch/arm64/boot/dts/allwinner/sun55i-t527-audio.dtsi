@@ -1,0 +1,405 @@
+
+&pio {
+	
+	owa_pins_a: owa@0 {
+		pins = "PI10";
+		function = "owa";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	owa_pins_b: owa@1 {
+		pins = "PI10";
+		function = "io_disabled";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s0_pins_a: i2s0@0 {
+		pins = "PB4", "PB5", "PB6";
+		function = "i2s0";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s0_pins_b: i2s0@1 {
+		pins = "PB4", "PB5", "PB6", "PB7", "PB8";
+		function = "io_disabled";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s0_pins_c: i2s0@2 {
+		pins = "PB7";
+		function = "i2s0_dout";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s0_pins_d: i2s0@3 {
+		pins = "PB8";
+		function = "i2s0_din";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s1_pins_a: i2s1@0 {
+		pins = "PG10", "PG11", "PG12";
+		function = "i2s1";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s1_pins_b: i2s1@1 {
+		pins = "PG10", "PG11", "PG12", "PG13", "PG14";
+		function = "io_disabled";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s1_pins_c: i2s1@2 {
+		pins = "PG13";
+		function = "i2s1_dout";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s1_pins_d: i2s1@3 {
+		pins = "PG14";
+		function = "i2s1_din";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s2_pins_a: i2s2@0 {
+		pins = "PH9", "PH10";
+		function = "i2s2";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s2_pins_b: i2s2@1 {
+		pins = "PH2", "PH3", "PH8", "PH9", "PH10", "PH11", "PH12";
+		function = "io_disabled";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s2_pins_c: i2s2@2 {
+		pins = "PH2", "PH3", "PH12";
+		function = "i2s2_din";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s2_pins_d: i2s2@3 {
+		pins = "PH11";
+		function = "i2s2_dout";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s2_pins_e: i2s2@4 {
+		pins = "PH8";
+		function = "i2s2_mclk";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s3_pins_a: i2s3@0 {
+		pins = "PF3", "PF5", "PF6";
+		function = "i2s3";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s3_pins_b: i2s3@1 {
+		pins = "PF0", "PF1", "PF2", "PF3", "PF4", "PF5", "PF6";
+		function = "io_disabled";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s3_pins_c: i2s3@2 {
+		pins = "PF0", "PF2", "PF4";
+		function = "i2s3_din";
+		drive-strength = <20>;
+		bias-disable;
+	};
+
+	i2s3_pins_d: i2s3@3 {
+		pins = "PF1";
+		function = "i2s3_dout";
+		drive-strength = <20>;
+		bias-disable;
+	};
+};
+
+
+
+/* audio dirver module -> audio codec */
+&codec {
+	tx-hub-en;
+	rx-sync-en;
+
+	dac-vol		= <63>;		/* default value:63 range:0->63 */
+	dacl-vol	= <160>;	/* default value:160 range:0->255 */
+	dacr-vol	= <160>;	/* default value:160 range:0->255 */
+	adc1-vol	= <160>;	/* default value:160 range:0->255 */
+	adc2-vol	= <160>;	/* default value:160 range:0->255 */
+	adc3-vol	= <160>;	/* default value:160 range:0->255 */
+	lineout-gain	= <31>;		/* default value:31 range:0->31 */
+	hpout-gain	= <7>;		/* default value:7 range:0->7 */
+	adc1-gain	= <31>;		/* default value:31 range:0->31 */
+	adc2-gain	= <31>;		/* default value:31 range:0->31 */
+	adc3-gain	= <31>;		/* default value:31 range:0->31 */
+
+	/* to do: avcc-1.8 vdd33-3.3 cpvin-1.8 */
+	avcc-external;
+	avcc-supply	= <&reg_aldo4>;
+	avcc-vol	= <1800000>;
+	vdd-external;
+	vdd-supply	= <&reg_cldo3>;
+	vdd-vol		= <3300000>;
+	cpvin-external;
+	cpvin-supply	= <&reg_bldo3>;
+	cpvin-vol	= <1800000>;
+
+	pa-pin-max	= <1>;
+	pa-pin-0	= <&r_pio PL 7 GPIO_ACTIVE_HIGH>;
+	pa-pin-level-0	= <1>;
+	pa-pin-msleep-0	= <0>;
+
+	jack-det-level		= <0>;
+	jack-det-threshold	= <8>;
+	jack-det-debouce-time	= <250>;
+
+	/* extcon                  = <&usb_power_supply>;
+	 * jack-swpin-mic-sel      = <&pio PH 8 GPIO_ACTIVE_HIGH>;
+	 * jack-swpin-hp-en        = <&pio PH 15 GPIO_ACTIVE_HIGH>;
+	 * jack-swpin-hp-sel       = <&pio PH 11 GPIO_ACTIVE_HIGH>;
+	 * jack-swmode-hp-off      = <0x00>;
+	 * jack-swmode-hp-usb      = <0x11>;
+	 * jack-swmode-hp-audio    = <0x10>;
+	 * jack-det-level          = <1>;
+	 * jack-det-threshold      = <8>;
+	 * jack-det-debouce-time   = <250>;
+	 */
+
+	status = "okay";
+};
+
+&codec_plat {
+	status = "okay";
+};
+
+&codec_mach {
+	soundcard-mach,jack-support = <1>;
+	status = "okay";
+	soundcard-mach,cpu {
+		sound-dai = <&codec_plat>;
+	};
+	soundcard-mach,codec {
+		sound-dai = <&codec>;
+	};
+};
+
+&hdmi_codec {
+	extcon = <&hdmi>;
+	status = "okay";
+};
+
+&edp_codec {
+	status = "disabled";
+};
+
+/* audio dirver module -> owa */
+&owa_plat {
+	pinctrl-used;
+	pinctrl-names	= "default","sleep";
+	pinctrl-0	= <&owa_pins_a>;
+	pinctrl-1	= <&owa_pins_b>;
+	tx-hub-en;
+	status		= "disabled";
+};
+
+&owa_mach {
+	status		= "disabled";
+	soundcard-mach,cpu {
+		sound-dai = <&owa_plat>;
+	};
+	soundcard-mach,codec {
+	};
+};
+
+/* audio dirver module -> DMIC */
+&dmic_plat {
+	rx-chmap	= <0x76543210>;
+	data-vol	= <0xB0>;
+	rxdelaytime	= <0>;
+	/* pinctrl-used; */
+	/* pinctrl-names	= "default","sleep"; */
+	/* pinctrl-0	= <&dmic_pins_a>; */
+	/* pinctrl-1	= <&dmic_pins_b>; */
+	rx-sync-en;
+	status		= "disabled";
+};
+
+&dmic_mach {
+	status		= "disabled";
+	soundcard-mach,cpu {
+		sound-dai = <&dmic_plat>;
+	};
+	soundcard-mach,codec {
+	};
+};
+
+/* audio dirver module -> I2S/PCM */
+&i2s0_plat {
+	tdm-num		= <0>;
+	tx-pin		= <0>;
+	rx-pin		= <0>;
+	pinctrl-used;
+	pinctrl-names	= "default","sleep";
+	pinctrl-0	= <&i2s0_pins_a &i2s0_pins_c &i2s0_pins_d>;
+	pinctrl-1	= <&i2s0_pins_b>;
+	tx-hub-en;
+	rx-sync-en;
+	status		= "disabled";
+};
+
+&i2s0_mach {
+	soundcard-mach,format		= "i2s";
+	soundcard-mach,frame-master	= <&i2s0_cpu>;
+	soundcard-mach,bitclock-master	= <&i2s0_cpu>;
+	/* soundcard-mach,frame-inversion; */
+	/* soundcard-mach,bitclock-inversion; */
+	soundcard-mach,slot-num		= <2>;
+	soundcard-mach,slot-width	= <32>;
+	soundcard-mach,capture-only;
+	status		= "disabled";
+	i2s0_cpu: soundcard-mach,cpu {
+		sound-dai = <&i2s0_plat>;
+		/* note: pll freq = 24.576M or 22.5792M * pll-fs */
+		soundcard-mach,pll-fs	= <1>;
+		/* note:
+		 * mclk freq = mclk-fs * 12.288M or 11.2896M	(when mclk-fp ture)
+		 * mclk freq = mclk-fs * pcm rate		(when mclk-fp false)
+		 */
+		soundcard-mach,mclk-fp;
+		soundcard-mach,mclk-fs	= <1>;
+	};
+	i2s0_codec: soundcard-mach,codec {
+	};
+};
+
+&i2s1_plat {
+	tdm-num		= <1>;
+	tx-pin		= <0>;
+	rx-pin		= <0>;
+	/* pinctrl-used; */
+	/* pinctrl-names= "default","sleep"; */
+	/* pinctrl-0	= <&i2s1_pins_a &i2s1_pins_c &i2s1_pins_d>; */
+	/* pinctrl-1	= <&i2s1_pins_b>; */
+	tx-hub-en;
+	rx-sync-en;
+	status		= "disabled";
+};
+
+&i2s1_mach {
+	soundcard-mach,format		= "i2s";
+	soundcard-mach,frame-master	= <&i2s1_cpu>;
+	soundcard-mach,bitclock-master	= <&i2s1_cpu>;
+	/* soundcard-mach,frame-inversion; */
+	/* soundcard-mach,bitclock-inversion; */
+	soundcard-mach,slot-num		= <2>;
+	soundcard-mach,slot-width	= <32>;
+	status		= "disabled";
+	i2s1_cpu: soundcard-mach,cpu {
+		sound-dai = <&i2s1_plat>;
+		soundcard-mach,pll-fs	= <1>;
+		soundcard-mach,mclk-fs	= <0>;
+	};
+	i2s1_codec: soundcard-mach,codec {
+	};
+};
+
+&i2s2_plat {
+	tdm-num		= <2>;
+	tx-pin		= <0 1 2 3>;
+	/* e.g.
+	* tx-pin0-map0 = <0xFEDC3210> -> tx_pin_map[0][0] (Dout0-slot[7:0]  map channel[15:12, 3:0])
+	* tx-pin0-map1 = <0x3210FEDC> -> tx_pin_map[0][1] (Dout0-slot[15:8] map channel[3:0, 15:12])
+	* tx-pin1-map0 = <0x76543210> -> tx_pin_map[1][0] (Dout1-slot[7:0]  map channel[7:0])
+	*/
+	tx-pin0-map0	= <0x76543210>;
+	tx-pin0-map1	= <0xFEDCBA98>;
+	tx-pin1-map0	= <0x76543210>;
+	tx-pin1-map1	= <0xFEDCBA98>;
+	tx-pin2-map0	= <0x76543210>;
+	tx-pin2-map1	= <0xFEDCBA98>;
+	tx-pin3-map0	= <0x76543210>;
+	tx-pin3-map1	= <0xFEDCBA98>;
+	rx-pin		= <0>;
+	/* pinctrl-used; */
+	/* pinctrl-names= "default","sleep"; */
+	/* pinctrl-0	= <&i2s2_pins_a &i2s2_pins_c &i2s2_pins_d &i2s2_pins_e>; */
+	/* pinctrl-1	= <&i2s2_pins_b>; */
+	tx-hub-en;
+	rx-sync-en;
+	/* edp not need dai-type */
+	dai-type = "hdmi";
+	status		= "okay";
+};
+
+&i2s2_mach {
+	soundcard-mach,format		= "i2s";
+	soundcard-mach,frame-master	= <&i2s2_cpu>;
+	soundcard-mach,bitclock-master	= <&i2s2_cpu>;
+	/* soundcard-mach,frame-inversion; */
+	/* soundcard-mach,bitclock-inversion; */
+	soundcard-mach,slot-num		= <2>;
+	soundcard-mach,slot-width	= <32>;
+	soundcard-mach,playback-only;
+	status		= "okay";
+	i2s2_cpu: soundcard-mach,cpu {
+		sound-dai = <&i2s2_plat>;
+		soundcard-mach,pll-fs	= <1>;
+		/* edp mclk: 512fs */
+		soundcard-mach,mclk-fs	= <0>;
+	};
+	i2s2_codec: soundcard-mach,codec {
+		sound-dai               = <&hdmi_codec>;
+	};
+};
+
+&i2s3_plat {
+	tdm-num		= <3>;
+	tx-pin		= <0>;
+	rx-pin		= <0>;
+	/* pinctrl-used; */
+	/* pinctrl-names= "default","sleep"; */
+	/* pinctrl-0	= <&i2s3_pins_a &i2s3_pins_c &i2s3_pins_d>; */
+	/* pinctrl-1	= <&i2s3_pins_b>; */
+	tx-hub-en;
+	rx-sync-en;
+	status		= "disabled";
+};
+
+&i2s3_mach {
+	soundcard-mach,format		= "i2s";
+	soundcard-mach,frame-master	= <&i2s3_cpu>;
+	soundcard-mach,bitclock-master	= <&i2s3_cpu>;
+	/* soundcard-mach,frame-inversion; */
+	/* soundcard-mach,bitclock-inversion; */
+	soundcard-mach,slot-num		= <2>;
+	soundcard-mach,slot-width	= <32>;
+	status		= "disabled";
+	i2s3_cpu: soundcard-mach,cpu {
+		sound-dai = <&i2s3_plat>;
+		soundcard-mach,pll-fs	= <1>;
+		soundcard-mach,mclk-fs	= <0>;
+	};
+	i2s3_codec: soundcard-mach,codec {
+	};
+};

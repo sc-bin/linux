@@ -1,0 +1,111 @@
+
+&pio {
+	pwm0_0_pin_active: pwm0_0@0 {
+		pins = "PD23";
+		function = "pwm0_0";
+	};
+
+	pwm0_0_pin_sleep: pwm0_0@1 {
+		pins = "PD23";
+		function = "gpio_in";
+		bias-pull-down;
+	};
+
+	pwm0_1_pin_active: pwm0_1@0 {
+		pins = "PD22";
+		function = "pwm0_1";
+	};
+
+	pwm0_1_pin_sleep: pwm0_1@1 {
+		pins = "PD22";
+		function = "gpio_in";
+		bias-pull-down;
+	};
+
+	pwm0_2_pin_active: pwm0_2@0 {
+		pins = "PB11";
+		function = "pwm0_2";
+	};
+
+	pwm0_2_pin_sleep: pwm0_2@1 {
+		pins = "PB11";
+		function = "gpio_in";
+		bias-pull-down;
+	};
+
+	pwm0_3_pin_active: pwm0_3@0 {
+		pins = "PB12";
+		function = "pwm0_3";
+	};
+
+	pwm0_3_pin_sleep: pwm0_3@1 {
+		pins = "PB12";
+		function = "gpio_in";
+		bias-pull-down;
+	};
+
+	pwm0_4_pin_active: pwm0_4@0 {
+		pins = "PI3";
+		function = "pwm0_4";
+	};
+
+	pwm0_4_pin_sleep: pwm0_4@1 {
+		pins = "PI3";
+		function = "gpio_in";
+		bias-pull-down;
+	};
+
+	pwm0_5_pin_active: pwm0_5@0 {
+		pins = "PI4";
+		function = "pwm0_5";
+	};
+
+	pwm0_5_pin_sleep: pwm0_5@1 {
+		pins = "PI4";
+		function = "gpio_in";
+		bias-pull-down;
+	};
+};
+
+&pwm0_0 {
+	pinctrl-names = "active", "sleep";
+	pinctrl-0 = <&pwm0_0_pin_active>;
+	pinctrl-1 = <&pwm0_0_pin_sleep>;
+	status = "okay";
+};
+
+&pwm0_1 {
+	pinctrl-names = "active", "sleep";
+	pinctrl-0 = <&pwm0_1_pin_active>;
+	pinctrl-1 = <&pwm0_1_pin_sleep>;
+	status = "disabled";
+};
+
+&pwm0_2 {
+	pinctrl-names = "active", "sleep";
+	pinctrl-0 = <&pwm0_2_pin_active>;
+	pinctrl-1 = <&pwm0_2_pin_sleep>;
+	status = "disabled";
+};
+
+&pwm0_3 {
+	pinctrl-names = "active", "sleep";
+	pinctrl-0 = <&pwm0_3_pin_active>;
+	pinctrl-1 = <&pwm0_3_pin_sleep>;
+	status = "disabled";
+};
+
+&pwm0_4 {
+	pinctrl-names = "active", "sleep";
+	pinctrl-0 = <&pwm0_4_pin_active>;
+	pinctrl-1 = <&pwm0_4_pin_sleep>;
+	status = "okay";
+};
+
+&pwm0_5 {
+	pinctrl-names = "active", "sleep";
+	pinctrl-0 = <&pwm0_5_pin_active>;
+	pinctrl-1 = <&pwm0_5_pin_sleep>;
+	status = "okay";
+};
+
